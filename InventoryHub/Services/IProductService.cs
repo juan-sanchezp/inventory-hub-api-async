@@ -1,0 +1,18 @@
+﻿
+using InventoryHub.DTOs;
+using System.Threading.Tasks;
+
+namespace InventoryHub.Services
+{
+    public interface IProductService
+    {
+
+        Task<List<ProductDTO>> GetAll();
+        Task<ProductDTO> GetById(int id);
+        Task<ProductDTO> Save(ProductDTO productDTO);
+
+        Task<ProductDTO> Update(int id, ProductDTO productDTO);
+
+        Task<ProductDTO> DeleteById(int id);
+    }
+}
