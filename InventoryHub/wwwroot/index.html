@@ -1,0 +1,302 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-6">
+
+    <h1 class="text-3xl font-bold mb-6">Inventario</h1>
+
+    <!-- FILTROS -->
+    <div class="bg-white p-4 rounded shadow mb-6 flex flex-wrap gap-3">
+        <input id="tvModel" placeholder="Modelo TV" class="border p-2 rounded">
+        <input id="minLed" type="number" placeholder="Min LEDs" class="border p-2 rounded w-32">
+        <input id="maxLed" type="number" placeholder="Max LEDs" class="border p-2 rounded w-32">
+        <input id="minLength" type="number" placeholder="Min mm" class="border p-2 rounded w-32">
+        <input id="maxLength" type="number" placeholder="Max mm" class="border p-2 rounded w-32">
+        <select id="volts" class="border p-2 rounded">
+            <option value="">Voltaje</option>
+            <option>5V</option>
+            <option>12V</option>
+            <option>24V</option>
+        </select>
+        <button onclick="search()" class="bg-blue-600 text-white px-4 py-2 rounded">Buscar</button>
+        <button onclick="loadAll()" class="bg-gray-500 text-white px-4 py-2 rounded">Limpiar</button>
+    </div>
+
+    <!-- TABLA -->
+    <div class="bg-white shadow rounded-lg overflow-hidden mb-8">
+        <table class="min-w-full text-sm text-left">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="p-3">Imagen</th>
+                    <th class="p-3">Código</th>
+                    <th class="p-3">Producto</th>
+                    <th class="p-3">Marca</th>
+                    <th class="p-3">Modelo</th>
+                    <th class="p-3">LED</th>
+                    <th class="p-3">Voltaje</th>
+                    <th class="p-3">Compatibles</th>
+                    <th class="p-3">Precio</th>
+                    <th class="p-3">Stock</th>
+                </tr>
+            </thead>
+            <tbody id="product-table"></tbody>
+        </table>
+    </div>
+
+    <!-- ✅ SECCIÓN PRUEBA DE SUBIDA DE IMÁGENES -->
+    <div class="bg-white p-6 rounded-lg shadow mb-8">
+        <h2 class="text-xl font-bold mb-4 text-gray-700">🧪 Prueba de subida de imágenes</h2>
+
+        <!-- Zona de drop -->
+        <div id="drop-zone"
+             class="border-2 border-dashed border-blue-400 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 transition mb-4"
+             onclick="document.getElementById('file-input').click()"
+             ondragover="handleDragOver(event)"
+             ondrop="handleDrop(event)">
+            <p class="text-gray-500 text-sm">Arrastra imágenes aquí o <span class="text-blue-600 font-semibold">haz clic para seleccionar</span></p>
+            <p class="text-xs text-gray-400 mt-1">PNG, JPG, WEBP — múltiples archivos permitidos</p>
+        </div>
+
+        <!-- Input oculto -->
+        <input id="file-input" type="file" multiple accept="image/*" class="hidden" onchange="handleFiles(this.files)">
+
+        <!-- Preview de imágenes seleccionadas -->
+        <div id="preview-container" class="flex flex-wrap gap-3 mb-4"></div>
+
+        <!-- Botón subir -->
+        <button id="upload-btn"
+                onclick="uploadImages()"
+                class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition disabled:opacity-50 hidden">
+            ⬆ Subir imágenes
+        </button>
+
+        <!-- Estado / Resultado -->
+        <div id="upload-status" class="mt-4"></div>
+    </div>
+
+    <!-- MODAL -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+        <div class="bg-white p-6 rounded shadow w-[450px]">
+            <h2 id="modal-title" class="text-xl font-bold mb-4"></h2>
+            <img id="modal-image" class="w-full h-48 object-cover rounded mb-4">
+            <ul id="model-list" class="list-disc pl-5 text-gray-700"></ul>
+            <button onclick="closeModal()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+
+        const table = document.getElementById("product-table");
+        let selectedFiles = [];
+
+        // ──────────────────────────────────────────────
+        // TABLA
+        // ──────────────────────────────────────────────
+
+        function renderProducts(products) {
+            table.innerHTML = "";
+            products.forEach(product => {
+                const led = product.ledDetails;
+                const row = document.createElement("tr");
+                row.className = "border-t hover:bg-gray-50";
+                row.innerHTML = `
+                        <td class="p-3"><img src="${product.images[0]}" class="w-14 h-14 object-cover rounded"></td>
+                        <td class="p-3">${product.code}</td>
+                        <td class="p-3 font-semibold">${product.name}</td>
+                        <td class="p-3">${product.brand}</td>
+                        <td class="p-3">${product.model}</td>
+                        <td class="p-3">${led.lengthMm}mm / ${led.ledCount} LEDs</td>
+                        <td class="p-3">${led.ledvolts}</td>
+                        <td class="p-3">
+                            <button onclick='showModels(${JSON.stringify(led.compatibleTVModels)}, "${product.name}", "${product.images[0]}")'
+                                    class="text-blue-600 underline">
+                                ${led.compatibleTVModels.length} modelos
+                            </button>
+                        </td>
+                        <td class="p-3 font-bold">$${product.price.toLocaleString()}</td>
+                        <td class="p-3">
+                            <span class="${product.stock <= product.minStock ? 'text-red-600 font-bold' : 'text-green-600'}">
+                                ${product.stock}
+                            </span>
+                        </td>
+                    `;
+                table.appendChild(row);
+            });
+        }
+
+        function loadAll() {
+            fetch("/api/products")
+                .then(res => res.json())
+                .then(data => renderProducts(data.data));
+        }
+
+        function search() {
+            const params = new URLSearchParams();
+            const tvModel = document.getElementById("tvModel").value;
+            const minLed = document.getElementById("minLed").value;
+            const maxLed = document.getElementById("maxLed").value;
+            const minLength = document.getElementById("minLength").value;
+            const maxLength = document.getElementById("maxLength").value;
+            const volts = document.getElementById("volts").value;
+
+            if (tvModel) params.append("CompatibleTVModel", tvModel);
+            if (minLed) params.append("MinLedCount", minLed);
+            if (maxLed) params.append("MaxLedCount", maxLed);
+            if (minLength) params.append("MinLengthMm", minLength);
+            if (maxLength) params.append("MaxLengthMm", maxLength);
+            if (volts) params.append("LedVolts", volts);
+
+            fetch("/api/products/led-strips/search?" + params.toString())
+                .then(res => res.json())
+                .then(data => renderProducts(data.data));
+        }
+
+        function showModels(models, productName, image) {
+            const list = document.getElementById("model-list");
+            list.innerHTML = "";
+            document.getElementById("modal-title").textContent = "Modelos compatibles con " + productName;
+            document.getElementById("modal-image").src = image;
+            models.forEach(m => {
+                const li = document.createElement("li");
+                li.textContent = m;
+                list.appendChild(li);
+            });
+            document.getElementById("modal").classList.remove("hidden");
+            document.getElementById("modal").classList.add("flex");
+        }
+
+        function closeModal() {
+            document.getElementById("modal").classList.add("hidden");
+        }
+
+        // ──────────────────────────────────────────────
+        // SUBIDA DE IMÁGENES
+        // ──────────────────────────────────────────────
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById("drop-zone").classList.add("bg-blue-50");
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            handleFiles(e.dataTransfer.files);
+        }
+
+        function handleFiles(files) {
+            selectedFiles = Array.from(files);
+            const preview = document.getElementById("preview-container");
+            preview.innerHTML = "";
+
+            selectedFiles.forEach((file, i) => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const div = document.createElement("div");
+                    div.className = "relative";
+                    div.innerHTML = `
+                            <img src="${e.target.result}" class="w-24 h-24 object-cover rounded border shadow">
+                            <span class="absolute bottom-0 left-0 right-0 text-center text-xs bg-black bg-opacity-50 text-white rounded-b truncate px-1">
+                                ${file.name}
+                            </span>
+                        `;
+                    preview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Mostrar botón si hay archivos
+            document.getElementById("upload-btn").classList.toggle("hidden", selectedFiles.length === 0);
+            document.getElementById("upload-status").innerHTML = "";
+        }
+
+        async function uploadImages() {
+            console.log("1. Función uploadImages iniciada");
+
+            if (selectedFiles.length === 0) {
+                console.log("2. No hay archivos seleccionados");
+                return;
+            }
+            console.log("2. Archivos seleccionados:", selectedFiles.length);
+
+            const btn = document.getElementById("upload-btn");
+            const status = document.getElementById("upload-status");
+
+            btn.disabled = true;
+            btn.textContent = "Subiendo...";
+
+            status.innerHTML = `<p class="text-gray-500 text-sm">⏳ Enviando ${selectedFiles.length} imagen(es)...</p>`;
+
+            const formData = new FormData();
+            selectedFiles.forEach((file, index) => {
+                console.log(`3. Agregando archivo ${index}:`, file.name, file.type, file.size);
+                formData.append("files", file);
+            });
+
+            try {
+                console.log("4. Preparando fetch");
+
+                // Usar fetch con más opciones
+                const res = await fetch("https://localhost:7266/api/products/1/images", {
+                    method: "POST",
+                    body: formData,
+                    // No incluyas 'Content-Type' header, el navegador lo pondrá automáticamente con el boundary correcto
+                });
+
+                console.log("5. Respuesta recibida, status:", res.status);
+
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    console.error("6. Error en respuesta:", errorText);
+                    throw new Error(`Error ${res.status}: ${errorText}`);
+                }
+
+                console.log("6. Respuesta OK, parseando JSON");
+                const urls = await res.json();
+                console.log("7. URLs recibidas:", urls);
+
+                status.innerHTML = `
+            <div class="bg-green-50 border border-green-300 rounded p-4">
+                <p class="text-green-700 font-semibold mb-3">
+                    ✅ ${urls.length} imagen(es) subidas correctamente
+                </p>
+                <div class="flex flex-wrap gap-2">
+                    ${urls.map(url => `
+                        <a href="${url}" target="_blank">
+                            <img src="${url}" 
+                                 class="w-20 h-20 object-cover rounded shadow hover:scale-105 transition">
+                        </a>
+                    `).join("")}
+                </div>
+            </div>
+        `;
+
+            } catch (err) {
+                console.error("ERROR en uploadImages:", err);
+                status.innerHTML = `
+            <p class="text-red-600">
+                ❌ Error: ${err.message}
+            </p>
+            <p class="text-xs text-gray-500 mt-2">
+                Revisa la consola para más detalles (F12)
+            </p>
+        `;
+            } finally {
+                console.log("8. Finally - habilitando botón");
+                btn.disabled = false;
+                btn.textContent = "⬆ Subir imágenes";
+            }
+        }
+
+        loadAll();
+
+    </script>
+
+
+
+</body>
+</html>

@@ -1,4 +1,5 @@
 ﻿using InventoryHub.Data;
+using InventoryHub.DTOs;
 using InventoryHub.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -53,6 +54,53 @@ namespace InventoryHub.Repositories
             _context.Products.Update(productEntity);
             await _context.SaveChangesAsync();
             return productEntity;
+        }
+
+        public async Task<List<ProductEntity>> SearchLedStripsAsync(LedStripFilter filter)
+        {
+            var query = _context.Products
+                .Include(p => p.LedDetails)
+                    .ThenInclude(ld => ld.CompatibleTVs)
+                .Include(p => p.Category)
+                .Where(p => p.Category.Name == "Tiras LED")
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(filter.CompatibleTVModel))
+                query = query.Where(p =>
+                    p.LedDetails != null &&
+                    p.LedDetails.CompatibleTVs.Any(tv =>
+                        tv.ModelCode.Contains(filter.CompatibleTVModel)));
+
+            if (filter.MinLedCount.HasValue)
+                query = query.Where(p =>
+                    p.LedDetails != null &&
+                    p.LedDetails.LedCount >= filter.MinLedCount.Value);
+
+            if (filter.MaxLedCount.HasValue)
+                query = query.Where(p =>
+                    p.LedDetails != null &&
+                    p.LedDetails.LedCount <= filter.MaxLedCount.Value);
+
+            if (filter.MinLengthMm.HasValue)
+                query = query.Where(p =>
+                    p.LedDetails != null &&
+                    p.LedDetails.LengthMm >= filter.MinLengthMm.Value);
+
+            if (filter.MaxLengthMm.HasValue)
+                query = query.Where(p =>
+                    p.LedDetails != null &&
+                    p.LedDetails.LengthMm <= filter.MaxLengthMm.Value);
+
+            if (!string.IsNullOrWhiteSpace(filter.LedVolts))
+            {
+                var volts = filter.LedVolts.Trim().ToLower();
+
+                query = query.Where(p =>
+                    p.LedDetails != null &&
+                    p.LedDetails.LedVolts.ToLower().Contains(volts));
+            }
+
+            return await query.ToListAsync();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using InventoryHub.Models;
+﻿using InventoryHub.DTOs;
+using InventoryHub.Models;
 using System.Threading.Tasks;
 
 namespace InventoryHub.Repositories
@@ -10,5 +11,7 @@ namespace InventoryHub.Repositories
         Task<ProductEntity?> AddAsync(ProductEntity productEntity);
         Task<ProductEntity> UpdateAsync(ProductEntity productEntity);
         Task<bool> DeleteAsync(ProductEntity productEntity);
+
+        Task<List<ProductEntity>> SearchLedStripsAsync(LedStripFilter filter);
     }
 }

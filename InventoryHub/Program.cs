@@ -1,7 +1,10 @@
 ﻿using InventoryHub.Data;
 using InventoryHub.Repositories;
 using InventoryHub.Services;
+
+using InventoryHub.Services.CloudinaryS;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -79,6 +82,7 @@ builder.Services.AddSwaggerGen(options =>
             new string[] {}
         }
     });
+    //options.OperationFilter<FileUploadOperationFilter>();
 });
 
 builder.Services.AddScoped<IProductService, ProductServiceImpl>();
@@ -86,8 +90,17 @@ builder.Services.AddScoped<IProductRepository, ProductRepositoryImpl>();
 //register mapper
 
 builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddScoped<CloudinaryService>();//cloudinary
 
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 104857600; // 100MB
+});
 
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = 104857600;
+});
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -109,8 +122,14 @@ app.UseAuthorization();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated(); // <-- Esta línea crea la BD y tablas si no existen
+   // db.Database.EnsureCreated(); // <-- Esta línea crea la BD y tablas si no existen
 }
+
+
+
+//app.UseCors("AllowLocalhost");
+
+app.UseStaticFiles(); // html en el proyecto
 
 app.MapControllers();
 

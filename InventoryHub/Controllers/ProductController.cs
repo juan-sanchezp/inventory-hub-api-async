@@ -1,9 +1,9 @@
 ﻿using InventoryHub.DTOs;
-using InventoryHub.Services;
 using InventoryHub.Responses;
+using InventoryHub.Services;
+using InventoryHub.Services.CloudinaryS;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using System.Threading.Tasks;
+
 
 namespace InventoryHub.Controllers
 {
@@ -13,10 +13,11 @@ namespace InventoryHub.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductService _service;
-
-        public ProductController(IProductService service)
+        private readonly CloudinaryService _cloudinaryService;
+        public ProductController(IProductService service, CloudinaryService cloudinaryService)
         {
             _service = service;
+            _cloudinaryService = cloudinaryService;
         }
 
         // GET: api/products
@@ -77,5 +78,52 @@ namespace InventoryHub.Controllers
 
             return Ok(ResponseFactory.Success(deleted, "Product deleted successfully"));
         }
+
+        //Filter
+        [HttpGet("led-strips/search")]
+        public async Task<IActionResult> SearchLedStrips([FromQuery] LedStripFilterDTO filter)
+        {
+            var results = await _service.SearchLedStrips(filter);
+            return Ok(new { success = true, message = "Search completed", data = results });
+        }
+
+
+        [HttpPost("{productId}/images")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadProductImages(
+            int productId,
+            [FromForm] IFormFile[] files)
+        {
+            if (files == null || files.Length == 0)
+                return BadRequest("No se enviaron archivos");
+
+            var urls = new List<string>();
+
+            foreach (var file in files)
+            {
+                var url = await _cloudinaryService.UploadImage(file);
+                urls.Add(url);
+            }
+
+            return Ok(urls);
+        }
+
+
+        [HttpPost("test-upload")]
+        [Consumes("multipart/form-data")]
+        public IActionResult TestImages([FromForm] List<IFormFile> files)
+        {
+            if (files == null || files.Count == 0)
+            {
+                return BadRequest("No se enviaron archivos");
+            }
+
+            return Ok(new
+            {
+                count = files.Count
+            });
+        }
+
     }
+
 }
