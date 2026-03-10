@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CloudinaryDotNet;
 using InventoryHub.Data;
 using InventoryHub.DTOs;
 using InventoryHub.Models;
@@ -10,39 +11,30 @@ namespace InventoryHub.Services
 {
     public class ProductServiceImpl : IProductService
     {
-        private readonly IProductRepository _productRepository;
+        private readonly IProductRepository _productAccessBd;
         private readonly IMapper _mapper;
         private readonly AppDbContext _context;
+        private readonly CloudinaryService _cloudinaryService;
 
-
-        public ProductServiceImpl(IProductRepository productRepository, IMapper mapper, AppDbContext context)
+        public ProductServiceImpl(IProductRepository productRepository, IMapper mapper, AppDbContext context, CloudinaryService cloudinaryService)
         {
-            _productRepository = productRepository;
+            _productAccessBd = productRepository;
             _mapper = mapper;
             _context = context;
+            _cloudinaryService = cloudinaryService;
         }
 
         // Obtener todos los productos con categorías y LedDetails
         public async Task<List<ProductDTO>> GetAll()
         {
-            var productsEntity = await _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.LedDetails)
-                    .ThenInclude(l => l.CompatibleTVs)
-                .ToListAsync();
-
+            var productsEntity = await _productAccessBd.GetAllAsync();
             return _mapper.Map<List<ProductDTO>>(productsEntity);
         }
 
         // Obtener producto por id
         public async Task<ProductDTO?> GetById(int id)
         {
-            var productEntity = await _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.LedDetails)
-                    .ThenInclude(l => l.CompatibleTVs)
-                .FirstOrDefaultAsync(p => p.Id == id);
-
+            var productEntity = await _productAccessBd.GetByIdAsync(id);
             if (productEntity == null) return null;
             return _mapper.Map<ProductDTO>(productEntity);
         }
@@ -123,16 +115,12 @@ namespace InventoryHub.Services
         // Eliminar producto
         public async Task<ProductDTO?> DeleteById(int id)
         {
-            var productEntity = await _context.Products
-                .Include(p => p.LedDetails)
-                    .ThenInclude(l => l.CompatibleTVs)
-                .FirstOrDefaultAsync(p => p.Id == id);
+            var productEntity = await _productAccessBd.GetByIdAsync(id);
 
             if (productEntity == null) return null;
-
-            _context.Products.Remove(productEntity);
-            await _context.SaveChangesAsync();
-
+            if(await _productAccessBd.DeleteAsync(productEntity) == false)
+                { return null; }
+   
             return _mapper.Map<ProductDTO>(productEntity);
         }
 
@@ -148,7 +136,7 @@ namespace InventoryHub.Services
                 LedVolts = dto.LedVolts
             };
 
-            var entities = await _productRepository.SearchLedStripsAsync(filter);
+            var entities = await _productAccessBd.SearchLedStripsAsync(filter);
             return _mapper.Map<List<ProductDTO>>(entities);
         }
 
@@ -167,6 +155,74 @@ namespace InventoryHub.Services
 
         //    return urls;
         //}
+        public async Task<List<string>> UploadProductImages(int productId, IFormFile[] files)
+        {
+            ProductEntity product = await _productAccessBd.GetByIdAsync(productId);
+            //var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == productId);
+            if (product == null) throw new Exception("Producto no encontrado");
+
+            var urls = new List<string>();
+            foreach (var file in files)
+            {
+                var url = await _cloudinaryService.UploadImage(file);
+                urls.Add(url);
+                product.Images.Add(url); // directamente en List<string>
+            }
+
+            await _productAccessBd.UpdateAsync(product);
+            return urls;
+        }
+
+
+
+        public async Task<List<string>> ReplaceProductImages(int productId, IFormFile[] files)
+        {
+            // Obtener el producto
+            var product = await _productAccessBd.GetByIdAsync(productId);
+            if (product == null) throw new Exception("Producto no encontrado");
+
+            // Si quieres, borrar las imágenes viejas del cloud
+            //foreach (var oldUrl in product.Images)
+            //{
+            //    await _cloudinaryService.UploadImage.destroy(oldUrl);
+            //}
+
+            // Limpiar lista local
+            product.Images.Clear();
+
+            var newUrls = new List<string>();
+            foreach (var file in files)
+            {
+                var url = await _cloudinaryService.UploadImage(file);
+                newUrls.Add(url);
+                product.Images.Add(url);
+            }
+
+            // Guardar cambios
+            await _productAccessBd.UpdateAsync(product);
+            return newUrls;
+        }
+
+        public async Task<bool> DeleteProductImage(int productId, string imageUrl)
+        {
+            var product = await _productAccessBd.GetByIdAsync(productId);
+            if (product == null) throw new Exception("Producto no encontrado");
+
+            // Verificar que la imagen exista
+            if (!product.Images.Contains(imageUrl)) return false;
+
+            // Borrar del cloud
+            //await _cloudinaryService.DeleteImage(imageUrl);
+
+            // Borrar de la lista local
+            product.Images.Remove(imageUrl);
+
+            // Guardar cambios
+            await _productAccessBd.UpdateAsync(product);
+            return true;
+        }
+
+
 
     }
 

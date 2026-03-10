@@ -122,7 +122,7 @@ app.UseAuthorization();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-   // db.Database.EnsureCreated(); // <-- Esta línea crea la BD y tablas si no existen
+    db.Database.EnsureCreated(); // <-- Esta línea crea la BD y tablas si no existen
 }
 
 

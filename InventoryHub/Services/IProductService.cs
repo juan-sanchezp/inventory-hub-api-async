@@ -17,7 +17,8 @@ namespace InventoryHub.Services
 
         Task<List<ProductDTO>> SearchLedStrips(LedStripFilterDTO filter);
 
-       // Task<List<string>> UploadProductImages(int productId, IFormFile[] files);
-
+        Task<List<string>> UploadProductImages(int productId, IFormFile[] files);
+        Task<List<string>> ReplaceProductImages(int productId, IFormFile[] files);
+        Task<bool> DeleteProductImage(int productId, string imageUrl);
     }
 }

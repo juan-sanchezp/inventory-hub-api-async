@@ -34,18 +34,26 @@ namespace InventoryHub.Repositories
         public async Task<bool> DeleteAsync(ProductEntity productEntity)
         {
             _context.Products.Remove(productEntity);
-            await _context.SaveChangesAsync();
-            return true;
+            var result = await _context.SaveChangesAsync();
+            return result > 0;
         }
 
         public async Task<List<ProductEntity>> GetAllAsync()
         {
-            return await _context.Products.ToListAsync();
+            return await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.LedDetails)
+                    .ThenInclude(l => l.CompatibleTVs)
+                .ToListAsync();
+            //return await _context.Products.ToListAsync();
         }
 
         public async Task<ProductEntity?> GetByIdAsync(int id)
         {
             return await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.LedDetails)
+                    .ThenInclude(l => l.CompatibleTVs)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 

@@ -1,5 +1,5 @@
 ﻿// ADD dataAnnotations.
-using System.Collections.Generic;
+using InventoryHub.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace InventoryHub.DTOs
@@ -36,12 +36,15 @@ namespace InventoryHub.DTOs
 
         [Range(0, 10000)]
         public int MinStock { get; set; }
+        public bool IsActive { get; set; } = true;
 
         [StringLength(500)]
         public string? Description { get; set; }
 
         // Aquí va el array/lista de imágenes
         public List<string> Images { get; set; } = new List<string>();
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
 
         // Detalles opcionales de LED
         public LedStripDetailsDTO? LedDetails { get; set; }
@@ -49,14 +52,23 @@ namespace InventoryHub.DTOs
 
     public class LedStripDetailsDTO
     {
+        [Range(1, 50)]
+        public int StripCount { get; set; }
+
         public int? LengthMm { get; set; }
+
         public int? LedCount { get; set; }
 
-        //public string? LedType { get; set; } cuadrado, normal, sin lente
+        [Range(3, 6)]
+        public int? LedVolts { get; set; }
 
-        [StringLength(10)]
-        [RegularExpression(@"^\d{1,2}V$", ErrorMessage = "Formato válido: 3V, 6V")]
-        public string? Ledvolts { get; set; }
+        public LedType LedType { get; set; }
+
+        [StringLength(20)]
+        public string? Distribution { get; set; }
+
+        [StringLength(200)]
+        public string? Notes { get; set; }
 
 
         // Modelos de TV compatibles

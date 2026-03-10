@@ -13,11 +13,11 @@ namespace InventoryHub.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductService _service;
-        private readonly CloudinaryService _cloudinaryService;
-        public ProductController(IProductService service, CloudinaryService cloudinaryService)
+        //private readonly CloudinaryService _cloudinaryService;
+        public ProductController(IProductService service)
         {
             _service = service;
-            _cloudinaryService = cloudinaryService;
+          
         }
 
         // GET: api/products
@@ -88,6 +88,27 @@ namespace InventoryHub.Controllers
         }
 
 
+        //[HttpPost("{productId}/images")]
+        //[Consumes("multipart/form-data")]
+        //public async Task<IActionResult> UploadProductImages(
+        //    int productId,
+        //    [FromForm] IFormFile[] files)
+        //{
+        //    if (files == null || files.Length == 0)
+        //        return BadRequest("No se enviaron archivos");
+
+        //    var urls = new List<string>();
+
+        //    foreach (var file in files)
+        //    {
+        //        var url = await _cloudinaryService.UploadImage(file);
+        //        urls.Add(url);
+        //    }
+
+        //    return Ok(urls);
+        //}
+
+
         [HttpPost("{productId}/images")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadProductImages(
@@ -97,16 +118,42 @@ namespace InventoryHub.Controllers
             if (files == null || files.Length == 0)
                 return BadRequest("No se enviaron archivos");
 
-            var urls = new List<string>();
-
-            foreach (var file in files)
-            {
-                var url = await _cloudinaryService.UploadImage(file);
-                urls.Add(url);
-            }
-
+            //var urls = new List<string>();
+            var urls = await _service.UploadProductImages(productId, files);
             return Ok(urls);
         }
+
+        // Reemplazar todas las imágenes de un producto
+        [HttpPut("{productId}/images")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> ReplaceProductImages(
+            int productId,
+            [FromForm] IFormFile[] files)
+        {
+            if (files == null || files.Length == 0)
+                return BadRequest("No se enviaron archivos");
+
+            var urls = await _service.ReplaceProductImages(productId, files);
+            return Ok(ResponseFactory.Success(urls, "Imágenes reemplazadas correctamente"));
+        }
+
+        // Borrar una imagen específica por su ID o URL
+        [HttpDelete("{productId}/images")]
+        public async Task<IActionResult> DeleteProductImage(
+            int productId,
+            [FromQuery] string imageUrl)
+        {
+            if (string.IsNullOrEmpty(imageUrl))
+                return BadRequest("Se requiere la URL de la imagen");
+
+            var result = await _service.DeleteProductImage(productId, imageUrl);
+            if (!result)
+                return NotFound(ResponseFactory.Fail<string>("Imagen no encontrada"));
+
+            return Ok(ResponseFactory.Success(imageUrl, "Imagen eliminada correctamente"));
+        }
+
+
 
 
         [HttpPost("test-upload")]
