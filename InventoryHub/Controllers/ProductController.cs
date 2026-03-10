@@ -3,6 +3,8 @@ using InventoryHub.Responses;
 using InventoryHub.Services;
 using InventoryHub.Services.CloudinaryS;
 using Microsoft.AspNetCore.Mvc;
+using OfficeOpenXml;
+using System.ComponentModel;
 
 
 namespace InventoryHub.Controllers
@@ -19,6 +21,7 @@ namespace InventoryHub.Controllers
             _service = service;
           
         }
+
 
         // GET: api/products
         [HttpGet(Name = "GetAllProducts")]
@@ -184,6 +187,77 @@ namespace InventoryHub.Controllers
             {
                 count = files.Count
             });
+        }
+
+
+        [HttpPost("import-excel")]
+        public async Task<IActionResult> ImportExcelFull(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("Archivo Excel vacío");
+
+            var result = await _service.ImportProductsFullExcel(file);
+
+            return Ok(new
+            {
+                success = true,
+                message = "Importación finalizada",
+                created = result.Created,
+                duplicates = result.Duplicates,
+                result.Products
+            });
+        }
+
+
+        [HttpGet("download-excel-template")]
+        public IActionResult DownloadExcelTemplate()
+        {
+
+            using var package = new ExcelPackage();
+            var sheet = package.Workbook.Worksheets.Add("Productos");
+
+            // Encabezados
+            string[] headers = new[]
+            {
+        "code", "barcode", "name", "categoryName", "brand", "model",
+        "price", "stock", "minStock", "description",
+        "inch", "stripCount", "lengthMm", "ledCount", "ledVolts",
+        "boardCode", "distribution", "ledType", "notes", "compatibleTVModels"
+    };
+
+            for (int i = 0; i < headers.Length; i++)
+            {
+                sheet.Cells[1, i + 1].Value = headers[i];
+                sheet.Column(i + 1).AutoFit();
+                sheet.Cells[1, i + 1].Style.Font.Bold = true;
+            }
+
+            // Ejemplo de fila
+            string[] exampleRow = new[]
+            {
+        "H65-3", "7896541230987", "Tiras LED Curvas LG", "Tiras LED", "HYLED", "JS-D-JP65DM-C72FG",
+        "120000", "6", "2", "Tira LED para TV de 65 pulgadas",
+        "65", "12", "800", "8", "6",
+        "HY65-CB12", "(3A+3B)", "0", "Cada tira tiene 8 LEDs", "HYLED6518INTM,65DM1200,65XLEDPRO"
+    };
+
+            for (int i = 0; i < exampleRow.Length; i++)
+            {
+                sheet.Cells[2, i + 1].Value = exampleRow[i];
+            }
+
+            // Comentario de LedType
+            sheet.Cells[1, 18].AddComment("Valores posibles: Normal=0, Cuadrado=1, SinLente=2", "Sistema");
+
+            var stream = new MemoryStream();
+            package.SaveAs(stream);
+            stream.Position = 0;
+
+            string excelName = $"Plantilla_Productos_{DateTime.UtcNow:yyyyMMdd_HHmmss}.xlsx";
+
+            return File(stream,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        excelName);
         }
 
     }
