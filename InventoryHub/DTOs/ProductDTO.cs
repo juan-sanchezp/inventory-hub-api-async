@@ -11,6 +11,7 @@ namespace InventoryHub.DTOs
         [Required]
         [StringLength(20)]
         public string Code { get; set; } = null!;
+        public string Barcode { get; set; } = null!;
 
         [Required]
         [StringLength(100)]
@@ -52,6 +53,8 @@ namespace InventoryHub.DTOs
 
     public class LedStripDetailsDTO
     {
+        public int Inch { get; set; } // <- NUEVO CAMPO
+
         [Range(1, 50)]
         public int StripCount { get; set; }
 
@@ -63,6 +66,8 @@ namespace InventoryHub.DTOs
         public int? LedVolts { get; set; }
 
         [StringLength(20)]
+         
+        public string BoardCode { get; set; }
         public string? Distribution { get; set; }
         public LedType LedType { get; set; }
 
@@ -86,5 +91,12 @@ namespace InventoryHub.DTOs
         public string Url { get; set; } = null!;
         public string PublicId { get; set; } = null!;
         public bool IsMain { get; set; }
+    }
+
+    //DTO UpdateStock
+    public class UpdateStockDTO
+    {
+        public int Id { get; set; }
+        public int Stock { get; set; }
     }
 }

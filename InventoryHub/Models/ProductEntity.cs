@@ -20,6 +20,8 @@ namespace InventoryHub.Models
         
         //codigo propio
         public string Code { get; set; } = null!;
+
+        public string Barcode { get; set; } = null!;
         public string Name { get; set; } = null!;
         public string Brand { get; set; } = null!;
         public string? Model { get; set; }
@@ -51,6 +53,8 @@ namespace InventoryHub.Models
     {
         public int Id { get; set; }
 
+        public int Inch { get; set; } // <- 22, 32, ..
+
         // 4A+4B  -> 4
         // 6T     -> 6
         public int StripCount { get; set; }
@@ -59,8 +63,10 @@ namespace InventoryHub.Models
         public int? LedCount { get; set; }
 
         // Normalmente 3V o 6V
-        public string? LedVolts { get; set; }
+        public int? LedVolts { get; set; }
 
+        //"4708-K50DFG-A3113N01",
+        public string BoardCode { get; set; }
         // 4R+4L
         // 5A+5B
         // null cuando solo dicen "3T"

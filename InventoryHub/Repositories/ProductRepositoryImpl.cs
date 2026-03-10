@@ -48,6 +48,19 @@ namespace InventoryHub.Repositories
                 .ToListAsync();
             //return await _context.Products.ToListAsync();
         }
+        public async Task<List<ProductEntity>> GetAllOrdenAsync()
+        {
+            var products = await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Images)
+                .Include(p => p.LedDetails)
+                    .ThenInclude(l => l.CompatibleTVs)
+                .ToListAsync();
+
+            var ordered = products.OrderBy(p => p.Code, new NaturalStringComparer()).ToList();
+            return ordered;
+            //return await _context.Products.ToListAsync();
+        }
 
         public async Task<ProductEntity?> GetByIdAsync(int id)
         {
@@ -101,16 +114,18 @@ namespace InventoryHub.Repositories
                     p.LedDetails != null &&
                     p.LedDetails.LengthMm <= filter.MaxLengthMm.Value);
 
+            // 🔹 Filtrado por LedVolts como int
             if (!string.IsNullOrWhiteSpace(filter.LedVolts))
             {
-                var volts = filter.LedVolts.Trim().ToLower();
-
+                int volts = int.Parse(filter.LedVolts.Trim());
                 query = query.Where(p =>
                     p.LedDetails != null &&
-                    p.LedDetails.LedVolts.ToLower().Contains(volts));
+                    p.LedDetails.LedVolts == volts);
             }
 
             return await query.ToListAsync();
         }
+
+
     }
 }

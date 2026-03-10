@@ -4,11 +4,125 @@
     <meta charset="UTF-8">
     <title>Inventario</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        h1, .modal-title {
+            font-family: 'Syne', sans-serif;
+        }
+
+        /* MODAL OVERLAY */
+        #modal {
+            backdrop-filter: blur(8px);
+            background: rgba(10, 14, 26, 0.75);
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        /* MODAL PANEL */
+        #modal-panel {
+            animation: slideUp 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(32px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* THUMBNAIL */
+        .thumb-item {
+            transition: all 0.18s ease;
+            cursor: pointer;
+        }
+
+            .thumb-item:hover {
+                transform: scale(1.06);
+            }
+
+            .thumb-item.active {
+                ring: 2px solid #6366f1;
+                opacity: 1;
+            }
+
+            .thumb-item:not(.active) {
+                opacity: 0.55;
+            }
+
+        /* LIGHTBOX */
+        #lightbox {
+            backdrop-filter: blur(12px);
+            background: rgba(0, 0, 0, 0.92);
+            animation: fadeIn 0.15s ease;
+        }
+
+        #lightbox-img {
+            animation: zoomIn 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* SCROLLBAR */
+        .styled-scroll::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        .styled-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .styled-scroll::-webkit-scrollbar-thumb {
+            background: #c7d2fe;
+            border-radius: 10px;
+        }
+
+        /* MODEL TAGS */
+        .model-tag {
+            background: #eef2ff;
+            color: #4338ca;
+            border: 1px solid #c7d2fe;
+            font-size: 0.72rem;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100 p-6">
 
-    <h1 class="text-3xl font-bold mb-6">Inventario</h1>
+    <h1 class="text-3xl font-bold mb-6" style="font-family:'Syne',sans-serif">Inventario</h1>
 
     <!-- FILTROS -->
     <div class="bg-white p-4 rounded shadow mb-6 flex flex-wrap gap-3">
@@ -48,11 +162,9 @@
         </table>
     </div>
 
-    <!-- ✅ SECCIÓN PRUEBA DE SUBIDA DE IMÁGENES -->
+    <!-- SUBIDA DE IMÁGENES -->
     <div class="bg-white p-6 rounded-lg shadow mb-8">
         <h2 class="text-xl font-bold mb-4 text-gray-700">🧪 Prueba de subida de imágenes</h2>
-
-        <!-- Zona de drop -->
         <div id="drop-zone"
              class="border-2 border-dashed border-blue-400 rounded-lg p-8 text-center cursor-pointer hover:bg-blue-50 transition mb-4"
              onclick="document.getElementById('file-input').click()"
@@ -61,60 +173,145 @@
             <p class="text-gray-500 text-sm">Arrastra imágenes aquí o <span class="text-blue-600 font-semibold">haz clic para seleccionar</span></p>
             <p class="text-xs text-gray-400 mt-1">PNG, JPG, WEBP — múltiples archivos permitidos</p>
         </div>
-
-        <!-- Input oculto -->
         <input id="file-input" type="file" multiple accept="image/*" class="hidden" onchange="handleFiles(this.files)">
-
-        <!-- Preview de imágenes seleccionadas -->
         <div id="preview-container" class="flex flex-wrap gap-3 mb-4"></div>
-
-        <!-- Botón subir -->
-        <button id="upload-btn"
-                onclick="uploadImages()"
+        <button id="upload-btn" onclick="uploadImages()"
                 class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition disabled:opacity-50 hidden">
             ⬆ Subir imágenes
         </button>
-
-        <!-- Estado / Resultado -->
         <div id="upload-status" class="mt-4"></div>
     </div>
 
-    <!-- MODAL -->
-    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
-        <div class="bg-white p-6 rounded shadow w-[450px]">
-            <h2 id="modal-title" class="text-xl font-bold mb-4"></h2>
-            <img id="modal-image" class="w-full h-48 object-cover rounded mb-4">
-            <ul id="model-list" class="list-disc pl-5 text-gray-700"></ul>
-            <button onclick="closeModal()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Cerrar</button>
+    <!-- ═══════════════════════════════════════════════
+         MODAL REDISEÑADO
+    ═══════════════════════════════════════════════ -->
+    <div id="modal" class="fixed inset-0 hidden items-center justify-center z-50 p-4">
+        <div id="modal-panel" class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+
+            <!-- HEADER -->
+            <div class="flex items-center justify-between px-7 py-5 border-b border-gray-100">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-widest text-indigo-500 mb-0.5">Galería de producto</p>
+                    <h2 id="modal-title" class="text-2xl font-extrabold text-gray-900 leading-tight modal-title"></h2>
+                </div>
+                <button onclick="closeModal()"
+                        class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-100 hover:text-red-600 transition text-gray-500 text-lg font-bold">
+                    ✕
+                </button>
+            </div>
+
+            <!-- BODY -->
+            <div class="flex flex-col md:flex-row flex-1 min-h-0 overflow-hidden">
+
+                <!-- IZQUIERDA: imagen principal + miniaturas -->
+                <div class="md:w-[340px] flex-shrink-0 flex flex-col gap-4 p-6 border-r border-gray-100 bg-gray-50">
+
+                    <!-- Imagen principal -->
+                    <div id="main-image-wrap"
+                         class="relative w-full aspect-square rounded-xl overflow-hidden bg-white border border-gray-200 shadow-sm flex items-center justify-center cursor-zoom-in group"
+                         onclick="openLightbox()">
+                        <img id="main-image" src="" alt="Imagen principal"
+                             class="w-full h-full object-contain transition duration-200 group-hover:scale-105">
+                        <!-- Zoom hint -->
+                        <div class="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                            🔍 Ver en grande
+                        </div>
+                    </div>
+
+                    <!-- Miniaturas -->
+                    <div id="thumbnails" class="flex gap-2 flex-wrap styled-scroll overflow-y-auto max-h-36"></div>
+                </div>
+
+                <!-- DERECHA: modelos compatibles -->
+                <div class="flex-1 flex flex-col min-h-0 p-6 overflow-y-auto styled-scroll">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-lg">📺</span>
+                        <h3 class="text-base font-semibold text-gray-700">Modelos de TV compatibles</h3>
+                        <span id="models-count" class="ml-auto text-xs font-semibold bg-indigo-100 text-indigo-600 px-2.5 py-0.5 rounded-full"></span>
+                    </div>
+
+                    <div id="model-list" class="flex flex-wrap gap-2 content-start"></div>
+
+                    <div id="no-models" class="hidden text-gray-400 text-sm mt-4">Sin modelos compatibles registrados.</div>
+                </div>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="px-7 py-4 border-t border-gray-100 flex justify-end bg-gray-50">
+                <button onclick="closeModal()"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         LIGHTBOX (imagen en grande)
+    ═══════════════════════════════════════════════ -->
+    <div id="lightbox" class="fixed inset-0 hidden items-center justify-center z-[60] p-4" onclick="handleLightboxClick(event)">
+
+        <!-- Botón cerrar -->
+        <button onclick="closeLightbox()"
+                class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white bg-opacity-15 hover:bg-opacity-30 text-white text-xl font-bold transition z-10">
+            ✕
+        </button>
+
+        <!-- Navegación anterior -->
+        <button id="lb-prev"
+                onclick="lightboxNav(-1); event.stopPropagation();"
+                class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center rounded-full bg-white bg-opacity-15 hover:bg-opacity-30 text-white text-2xl font-bold transition z-10">
+            ‹
+        </button>
+
+        <!-- Imagen grande -->
+        <img id="lightbox-img" src="" alt="Vista ampliada"
+             class="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl select-none"
+             onclick="event.stopPropagation()">
+
+        <!-- Navegación siguiente -->
+        <button id="lb-next"
+                onclick="lightboxNav(1); event.stopPropagation();"
+                class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center rounded-full bg-white bg-opacity-15 hover:bg-opacity-30 text-white text-2xl font-bold transition z-10">
+            ›
+        </button>
+
+        <!-- Contador -->
+        <div id="lb-counter"
+             class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white bg-opacity-15 text-white text-sm px-4 py-1.5 rounded-full backdrop-blur">
         </div>
     </div>
 
     <script>
-
-        const table = document.getElementById("product-table");
+        const tableEl = document.getElementById("product-table");
         let selectedFiles = [];
 
-        // ──────────────────────────────────────────────
-        // TABLA
-        // ──────────────────────────────────────────────
+        // Estado del modal y lightbox
+        let currentImages = [];
+        let currentImageIndex = 0;
 
+        /* ─── TABLA ─── */
         function renderProducts(products) {
-            table.innerHTML = "";
+            tableEl.innerHTML = "";
             products.forEach(product => {
                 const led = product.ledDetails;
+                const image = product.images?.length
+                    ? (product.images.find(x => x.isMain)?.url || product.images[0].url)
+                    : "https://via.placeholder.com/80";
+
                 const row = document.createElement("tr");
                 row.className = "border-t hover:bg-gray-50";
                 row.innerHTML = `
-                        <td class="p-3"><img src="${product.images[0]}" class="w-14 h-14 object-cover rounded"></td>
+                        <td class="p-3"><img src="${image}" class="w-14 h-14 object-cover rounded"></td>
                         <td class="p-3">${product.code}</td>
                         <td class="p-3 font-semibold">${product.name}</td>
                         <td class="p-3">${product.brand}</td>
                         <td class="p-3">${product.model}</td>
                         <td class="p-3">${led.lengthMm}mm / ${led.ledCount} LEDs</td>
-                        <td class="p-3">${led.ledvolts}</td>
+                        <td class="p-3">${led.ledVolts}V</td>
                         <td class="p-3">
-                            <button onclick='showModels(${JSON.stringify(led.compatibleTVModels)}, "${product.name}", "${product.images[0]}")'
-                                    class="text-blue-600 underline">
+                            <button onclick='showModels(${JSON.stringify(led.compatibleTVModels)}, "${product.name}", ${JSON.stringify(product.images)})'
+                                    class="text-indigo-600 underline hover:text-indigo-800 transition">
                                 ${led.compatibleTVModels.length} modelos
                             </button>
                         </td>
@@ -125,7 +322,7 @@
                             </span>
                         </td>
                     `;
-                table.appendChild(row);
+                tableEl.appendChild(row);
             });
         }
 
@@ -156,147 +353,181 @@
                 .then(data => renderProducts(data.data));
         }
 
-        function showModels(models, productName, image) {
-            const list = document.getElementById("model-list");
-            list.innerHTML = "";
-            document.getElementById("modal-title").textContent = "Modelos compatibles con " + productName;
-            document.getElementById("modal-image").src = image;
-            models.forEach(m => {
-                const li = document.createElement("li");
-                li.textContent = m;
-                list.appendChild(li);
-            });
+        /* ─── MODAL ─── */
+        function showModels(models, productName, images) {
+            currentImages = images || [];
+
+            // Título
+            document.getElementById("modal-title").textContent = productName;
+
+            // Modelos compatibles
+            const modelList = document.getElementById("model-list");
+            const noModels = document.getElementById("no-models");
+            modelList.innerHTML = "";
+
+            if (models.length === 0) {
+                noModels.classList.remove("hidden");
+            } else {
+                noModels.classList.add("hidden");
+                models.forEach(m => {
+                    const span = document.createElement("span");
+                    span.className = "model-tag";
+                    span.textContent = m;
+                    modelList.appendChild(span);
+                });
+            }
+
+            document.getElementById("models-count").textContent = models.length + " modelos";
+
+            // Imágenes
+            const thumbs = document.getElementById("thumbnails");
+            thumbs.innerHTML = "";
+
+            if (currentImages.length > 0) {
+                setMainImage(0);
+                currentImages.forEach((img, i) => {
+                    const el = document.createElement("div");
+                    el.className = "thumb-item w-16 h-16 rounded-lg overflow-hidden border-2 border-transparent hover:border-indigo-400 transition" + (i === 0 ? " active border-indigo-500" : "");
+                    el.innerHTML = `<img src="${img.url}" class="w-full h-full object-cover">`;
+                    el.onclick = () => setMainImage(i);
+                    thumbs.appendChild(el);
+                });
+            } else {
+                document.getElementById("main-image").src = "https://via.placeholder.com/400";
+            }
+
             document.getElementById("modal").classList.remove("hidden");
             document.getElementById("modal").classList.add("flex");
         }
 
+        function setMainImage(index) {
+            currentImageIndex = index;
+            const url = currentImages[index]?.url || "";
+            document.getElementById("main-image").src = url;
+
+            // Actualizar estado activo de miniaturas
+            document.querySelectorAll(".thumb-item").forEach((el, i) => {
+                el.classList.toggle("active", i === index);
+                el.classList.toggle("border-indigo-500", i === index);
+                el.classList.toggle("border-transparent", i !== index);
+            });
+        }
+
         function closeModal() {
             document.getElementById("modal").classList.add("hidden");
+            document.getElementById("modal").classList.remove("flex");
         }
 
-        // ──────────────────────────────────────────────
-        // SUBIDA DE IMÁGENES
-        // ──────────────────────────────────────────────
+        /* ─── LIGHTBOX ─── */
+        function openLightbox() {
+            if (!currentImages.length) return;
+            document.getElementById("lightbox-img").src = currentImages[currentImageIndex].url;
+            updateLightboxCounter();
+            document.getElementById("lightbox").classList.remove("hidden");
+            document.getElementById("lightbox").classList.add("flex");
 
-        function handleDragOver(e) {
-            e.preventDefault();
-            document.getElementById("drop-zone").classList.add("bg-blue-50");
+            // Mostrar/ocultar flechas
+            const hasMultiple = currentImages.length > 1;
+            document.getElementById("lb-prev").style.display = hasMultiple ? "" : "none";
+            document.getElementById("lb-next").style.display = hasMultiple ? "" : "none";
         }
 
-        function handleDrop(e) {
-            e.preventDefault();
-            handleFiles(e.dataTransfer.files);
+        function closeLightbox() {
+            document.getElementById("lightbox").classList.add("hidden");
+            document.getElementById("lightbox").classList.remove("flex");
         }
+
+        function handleLightboxClick(e) {
+            if (e.target === document.getElementById("lightbox")) closeLightbox();
+        }
+
+        function lightboxNav(dir) {
+            if (!currentImages.length) return;
+            currentImageIndex = (currentImageIndex + dir + currentImages.length) % currentImages.length;
+            const img = document.getElementById("lightbox-img");
+            img.style.animation = "none";
+            img.offsetHeight; // reflow
+            img.style.animation = "";
+            img.src = currentImages[currentImageIndex].url;
+            updateLightboxCounter();
+            setMainImage(currentImageIndex); // sincroniza miniatura
+        }
+
+        function updateLightboxCounter() {
+            document.getElementById("lb-counter").textContent =
+                `${currentImageIndex + 1} / ${currentImages.length}`;
+        }
+
+        // Cerrar modal/lightbox con Escape
+        document.addEventListener("keydown", e => {
+            if (e.key === "Escape") {
+                if (!document.getElementById("lightbox").classList.contains("hidden")) {
+                    closeLightbox();
+                } else {
+                    closeModal();
+                }
+            }
+            if (!document.getElementById("lightbox").classList.contains("hidden")) {
+                if (e.key === "ArrowLeft") lightboxNav(-1);
+                if (e.key === "ArrowRight") lightboxNav(1);
+            }
+        });
+
+        /* ─── SUBIDA DE IMÁGENES ─── */
+        function handleDragOver(e) { e.preventDefault(); }
+        function handleDrop(e) { e.preventDefault(); handleFiles(e.dataTransfer.files); }
 
         function handleFiles(files) {
             selectedFiles = Array.from(files);
             const preview = document.getElementById("preview-container");
             preview.innerHTML = "";
-
-            selectedFiles.forEach((file, i) => {
+            selectedFiles.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = e => {
                     const div = document.createElement("div");
                     div.className = "relative";
                     div.innerHTML = `
                             <img src="${e.target.result}" class="w-24 h-24 object-cover rounded border shadow">
-                            <span class="absolute bottom-0 left-0 right-0 text-center text-xs bg-black bg-opacity-50 text-white rounded-b truncate px-1">
-                                ${file.name}
-                            </span>
+                            <span class="absolute bottom-0 left-0 right-0 text-center text-xs bg-black bg-opacity-50 text-white rounded-b truncate px-1">${file.name}</span>
                         `;
                     preview.appendChild(div);
                 };
                 reader.readAsDataURL(file);
             });
-
-            // Mostrar botón si hay archivos
             document.getElementById("upload-btn").classList.toggle("hidden", selectedFiles.length === 0);
-            document.getElementById("upload-status").innerHTML = "";
         }
 
         async function uploadImages() {
-            console.log("1. Función uploadImages iniciada");
-
-            if (selectedFiles.length === 0) {
-                console.log("2. No hay archivos seleccionados");
-                return;
-            }
-            console.log("2. Archivos seleccionados:", selectedFiles.length);
-
+            if (!selectedFiles.length) return;
             const btn = document.getElementById("upload-btn");
             const status = document.getElementById("upload-status");
-
             btn.disabled = true;
             btn.textContent = "Subiendo...";
 
-            status.innerHTML = `<p class="text-gray-500 text-sm">⏳ Enviando ${selectedFiles.length} imagen(es)...</p>`;
-
             const formData = new FormData();
-            selectedFiles.forEach((file, index) => {
-                console.log(`3. Agregando archivo ${index}:`, file.name, file.type, file.size);
-                formData.append("files", file);
-            });
+            selectedFiles.forEach(file => formData.append("files", file));
 
             try {
-                console.log("4. Preparando fetch");
-
-                // Usar fetch con más opciones
-                const res = await fetch("https://localhost:7266/api/products/1/images", {
-                    method: "POST",
-                    body: formData,
-                    // No incluyas 'Content-Type' header, el navegador lo pondrá automáticamente con el boundary correcto
-                });
-
-                console.log("5. Respuesta recibida, status:", res.status);
-
-                if (!res.ok) {
-                    const errorText = await res.text();
-                    console.error("6. Error en respuesta:", errorText);
-                    throw new Error(`Error ${res.status}: ${errorText}`);
-                }
-
-                console.log("6. Respuesta OK, parseando JSON");
+                const res = await fetch("https://localhost:7266/api/products/1/images", { method: "POST", body: formData });
+                if (!res.ok) throw new Error(await res.text());
                 const urls = await res.json();
-                console.log("7. URLs recibidas:", urls);
-
                 status.innerHTML = `
-            <div class="bg-green-50 border border-green-300 rounded p-4">
-                <p class="text-green-700 font-semibold mb-3">
-                    ✅ ${urls.length} imagen(es) subidas correctamente
-                </p>
-                <div class="flex flex-wrap gap-2">
-                    ${urls.map(url => `
-                        <a href="${url}" target="_blank">
-                            <img src="${url}" 
-                                 class="w-20 h-20 object-cover rounded shadow hover:scale-105 transition">
-                        </a>
-                    `).join("")}
-                </div>
-            </div>
-        `;
-
+                        <div class="bg-green-50 border border-green-300 rounded p-4">
+                            <p class="text-green-700 font-semibold mb-3">✅ ${urls.length} imagen(es) subidas</p>
+                            <div class="flex flex-wrap gap-2">
+                                ${urls.map(url => `<a href="${url}" target="_blank"><img src="${url}" class="w-20 h-20 object-cover rounded shadow"></a>`).join("")}
+                            </div>
+                        </div>`;
             } catch (err) {
-                console.error("ERROR en uploadImages:", err);
-                status.innerHTML = `
-            <p class="text-red-600">
-                ❌ Error: ${err.message}
-            </p>
-            <p class="text-xs text-gray-500 mt-2">
-                Revisa la consola para más detalles (F12)
-            </p>
-        `;
+                status.innerHTML = `<p class="text-red-600">❌ Error: ${err.message}</p>`;
             } finally {
-                console.log("8. Finally - habilitando botón");
                 btn.disabled = false;
                 btn.textContent = "⬆ Subir imágenes";
             }
         }
 
         loadAll();
-
     </script>
-
-
 
 </body>
 </html>

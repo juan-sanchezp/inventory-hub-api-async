@@ -13,13 +13,15 @@ namespace InventoryHub.Services
     public class ProductServiceImpl : IProductService
     {
         private readonly IProductRepository _productAccessBd;
+        private readonly ICategoryRepository _categoryAccessBd;
         private readonly IMapper _mapper;
         private readonly AppDbContext _context;
         private readonly CloudinaryService _cloudinaryService;
 
-        public ProductServiceImpl(IProductRepository productRepository, IMapper mapper, AppDbContext context, CloudinaryService cloudinaryService)
+        public ProductServiceImpl(IProductRepository productRepository, ICategoryRepository categoryAccessBd, IMapper mapper, AppDbContext context, CloudinaryService cloudinaryService)
         {
             _productAccessBd = productRepository;
+            _categoryAccessBd = categoryAccessBd;
             _mapper = mapper;
             _context = context;
             _cloudinaryService = cloudinaryService;
@@ -32,7 +34,6 @@ namespace InventoryHub.Services
             return _mapper.Map<List<ProductDTO>>(productsEntity);
         }
 
-        // Obtener producto por id
         public async Task<ProductDTO?> GetById(int id)
         {
             var productEntity = await _productAccessBd.GetByIdAsync(id);
@@ -40,35 +41,33 @@ namespace InventoryHub.Services
             return _mapper.Map<ProductDTO>(productEntity);
         }
 
-        // Guardar producto
         public async Task<ProductDTO?> Save(ProductDTO productDTO)
         {
-            // Validar/crear categoría
-            var category = await _context.Categories
-                .FirstOrDefaultAsync(c => c.Id == productDTO.CategoryId);
-
+            // Buscar o crear categoría
+            var category = await _categoryAccessBd.GetByIdAsync(productDTO.CategoryId);
             if (category == null)
             {
-                // Puedes crear la categoría si no existe
-                category = new Models.CategoryEntity { Name = productDTO.CategoryName };
-                _context.Categories.Add(category);
-                await _context.SaveChangesAsync();
+                category = new CategoryEntity { Name = productDTO.CategoryName };
+                category = await _categoryAccessBd.AddAsync(category);
             }
+            productDTO.Code = productDTO.Code.Trim().ToUpper(); //normalizar code
 
+            // Mapear DTO a Entity
             var entity = _mapper.Map<ProductEntity>(productDTO);
             entity.CategoryId = category.Id;
 
-            // Manejar LedDetails si aplica
+            // Mapear LedDetails si existen
             if (productDTO.LedDetails != null)
             {
-                var ledDetails = _mapper.Map<LedStripDetailsEntity>(productDTO.LedDetails);
-                entity.LedDetails = ledDetails;
+                entity.LedDetails = _mapper.Map<LedStripDetailsEntity>(productDTO.LedDetails);
             }
 
-            await _context.Products.AddAsync(entity);
-            await _context.SaveChangesAsync();
+            // Guardar usando ProductRepository
+            var savedEntity = await _productAccessBd.AddAsync(entity);
+            if (savedEntity == null) return null; // ya existía
 
-            return _mapper.Map<ProductDTO>(entity);
+            // Retornar DTO
+            return _mapper.Map<ProductDTO>(savedEntity);
         }
 
         // Actualizar producto
@@ -113,7 +112,21 @@ namespace InventoryHub.Services
             return _mapper.Map<ProductDTO>(existingProduct);
         }
 
-        // Eliminar producto
+        public async Task<ProductDTO?> UpdateStockAsync(UpdateStockDTO dto)
+        {
+            var product = await _productAccessBd.GetByIdAsync(dto.Id);
+
+            if (product == null) return null;
+
+            // Validación opcional
+            if (dto.Stock < 0) throw new ArgumentException("Stock cannot be negative");
+
+            product.Stock = dto.Stock;
+            product.UpdatedAt = DateTime.UtcNow;
+            ProductEntity productEntity = await _productAccessBd.UpdateAsync(product);
+            return _mapper.Map<ProductDTO>(productEntity);
+        }
+
         public async Task<ProductDTO?> DeleteById(int id)
         {
             var productEntity = await _productAccessBd.GetByIdAsync(id);
@@ -190,20 +203,64 @@ namespace InventoryHub.Services
             return urls;
         }
 
-
-
-        public async Task<List<string>> ReplaceProductImages(int productId, IFormFile[] files)
+        public async Task<bool> DeleteProductImage(int productId, string publicId)
         {
+            var product = await _productAccessBd.GetByIdAsync(productId);
 
-            return null;
-        }
+            if (product == null)
+                return false;
 
-        public async Task<bool> DeleteProductImage(int productId, string imageUrl)
-        {
+            var image = product.Images.FirstOrDefault(i => i.PublicId == publicId);
+
+            if (image == null)
+                return false;
+
+            // eliminar en cloudinary
+            await _cloudinaryService.DeleteImageAsync(publicId);
+
+            // eliminar de la BD
+            product.Images.Remove(image);
+
+            await _productAccessBd.UpdateAsync(product);
+
             return true;
         }
 
+        Task<List<string>> IProductService.ReplaceProductImages(int productId, IFormFile[] files)
+        {
+            throw new NotImplementedException();
+        }
 
+        public async Task<ProductImageDTO?> ReplaceImage(int productId, string oldPublicId, IFormFile newFile)
+        {
+            var product = await _productAccessBd.GetByIdAsync(productId);
+
+            if (product == null)
+                return null;
+
+            var oldImage = product.Images.FirstOrDefault(i => i.PublicId == oldPublicId);
+
+            if (oldImage == null)
+                return null;
+
+            // borrar imagen vieja
+            await _cloudinaryService.DeleteImageAsync(oldPublicId);
+
+            // subir nueva
+            var uploadResult = await _cloudinaryService.UploadImage(newFile);
+
+            oldImage.Url = uploadResult.Url;
+            oldImage.PublicId = uploadResult.PublicId;
+
+            await _productAccessBd.UpdateAsync(product);
+
+            return new ProductImageDTO
+            {
+                Url = oldImage.Url,
+                PublicId = oldImage.PublicId,
+                IsMain = oldImage.IsMain
+            };
+        }
 
     }
 

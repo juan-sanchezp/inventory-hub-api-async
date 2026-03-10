@@ -68,6 +68,22 @@ namespace InventoryHub.Controllers
             return Ok(ResponseFactory.Success(updated, "Product updated successfully"));
         }
 
+        // PATCH: api/products/stock
+        [HttpPatch("stock")]
+        public async Task<IActionResult> UpdateStock([FromBody] UpdateStockDTO dto)
+        {
+            if (dto == null)
+                return BadRequest(ResponseFactory.Fail<UpdateStockDTO>("Invalid request body"));
+
+            var updated = await _service.UpdateStockAsync(dto);
+
+            if (updated == null)
+                return NotFound(ResponseFactory.Fail<ProductDTO>("Product not found"));
+
+            return Ok(ResponseFactory.Success(updated, "Stock updated successfully"));
+        }
+
+
         // DELETE: api/products/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
@@ -141,18 +157,17 @@ namespace InventoryHub.Controllers
         [HttpDelete("{productId}/images")]
         public async Task<IActionResult> DeleteProductImage(
             int productId,
-            [FromQuery] string imageUrl)
+            [FromQuery] string publicId)
         {
-            if (string.IsNullOrEmpty(imageUrl))
+            if (string.IsNullOrEmpty(publicId))
                 return BadRequest("Se requiere la URL de la imagen");
 
-            var result = await _service.DeleteProductImage(productId, imageUrl);
+            var result = await _service.DeleteProductImage(productId, publicId);
             if (!result)
                 return NotFound(ResponseFactory.Fail<string>("Imagen no encontrada"));
 
-            return Ok(ResponseFactory.Success(imageUrl, "Imagen eliminada correctamente"));
+            return Ok(ResponseFactory.Success("Imagen eliminada correctamente"));
         }
-
 
 
 

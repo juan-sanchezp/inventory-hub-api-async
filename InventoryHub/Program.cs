@@ -85,11 +85,13 @@ builder.Services.AddSwaggerGen(options =>
     //options.OperationFilter<FileUploadOperationFilter>();
 });
 
-builder.Services.AddScoped<IProductService, ProductServiceImpl>();
+//Repositories
+builder.Services.AddScoped<ICategoryRepository, CategoryRepositoryImpl>();
 builder.Services.AddScoped<IProductRepository, ProductRepositoryImpl>();
-//register mapper
 
-builder.Services.AddAutoMapper(typeof(Program));
+//Servicios
+builder.Services.AddAutoMapper(typeof(Program)); //AutoMapper
+builder.Services.AddScoped<IProductService, ProductServiceImpl>();
 builder.Services.AddScoped<CloudinaryService>();//cloudinary
 
 builder.Services.Configure<FormOptions>(options =>

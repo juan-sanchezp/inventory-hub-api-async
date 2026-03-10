@@ -5,6 +5,7 @@
     <title>Subir imágenes de producto</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-100 p-10">
 
     <h1 class="text-3xl font-bold mb-6">Subir imágenes de producto</h1>
@@ -29,11 +30,13 @@
         </button>
 
         <div id="result" class="mt-4 text-sm"></div>
+
         <div id="preview" class="mt-4 grid grid-cols-2 gap-2"></div>
 
     </div>
 
     <script>
+
         async function uploadImages() {
 
             const productId = document.getElementById("productId").value;
@@ -50,11 +53,13 @@
             }
 
             const formData = new FormData();
+
             for (let file of fileInput.files) {
                 formData.append("files", file);
             }
 
             try {
+
                 const response = await fetch(`https://localhost:7266/api/products/${productId}/images`, {
                     method: "POST",
                     body: formData
@@ -65,22 +70,41 @@
                     throw new Error(text || "Error al subir imágenes");
                 }
 
-                const urls = await response.json();
+                const images = await response.json();
 
-                result.innerHTML = `<b>Imágenes subidas:</b> (${urls.length})`;
+                result.innerHTML = `<b>Imágenes subidas:</b> (${images.length})`;
 
-                // Mostrar preview de las imágenes subidas
-                urls.forEach(url => {
+                images.forEach(imgData => {
+
+                    const container = document.createElement("div");
+                    container.className = "relative";
+
                     const img = document.createElement("img");
-                    img.src = url;
-                    img.className = "w-full h-32 object-cover rounded";
-                    preview.appendChild(img);
+                    img.src = imgData.url;
+                    img.className = "w-full h-32 object-cover rounded border";
+
+                    container.appendChild(img);
+
+                    if (imgData.isMain) {
+                        const badge = document.createElement("span");
+                        badge.innerText = "Principal";
+                        badge.className = "absolute top-1 left-1 bg-green-500 text-white text-xs px-2 py-1 rounded";
+                        container.appendChild(badge);
+                    }
+
+                    preview.appendChild(container);
+
                 });
 
-            } catch (error) {
-                result.innerHTML = "Error: " + error.message;
             }
+            catch (error) {
+
+                result.innerHTML = "Error: " + error.message;
+
+            }
+
         }
+
     </script>
 
 </body>
