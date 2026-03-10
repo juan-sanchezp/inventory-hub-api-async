@@ -31,7 +31,9 @@ namespace InventoryHub.Models
         public string? Description { get; set; }
 
         // Aquí va el array/lista de imágenes
-        public List<string> Images { get; set; } = new List<string>();
+        //public List<string> Images { get; set; } = new List<string>();
+        public ICollection<ProductImageEntity> Images { get; set; } = new List<ProductImageEntity>();
+
         // Fechas
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
@@ -53,11 +55,12 @@ namespace InventoryHub.Models
         // 6T     -> 6
         public int StripCount { get; set; }
 
-        // Normalmente 3V o 6V
-        public string? LedVolts { get; set; }
         public int? LengthMm { get; set; }
         public int? LedCount { get; set; }
-       
+
+        // Normalmente 3V o 6V
+        public string? LedVolts { get; set; }
+
         // 4R+4L
         // 5A+5B
         // null cuando solo dicen "3T"
@@ -87,5 +90,18 @@ namespace InventoryHub.Models
         // FK hacia LedStripDetails
         public int LedDetailsId { get; set; }
         public LedStripDetailsEntity LedDetails { get; set; } = null!;
+    }
+
+    // 🔹 Entidad para las imágenes de productos
+    public class ProductImageEntity
+    {
+        public int Id { get; set; }
+        public string Url { get; set; } = null!;        // URL de Cloudinary
+        public string PublicId { get; set; } = null!;   // public_id para borrar/reemplazar
+        public bool IsMain { get; set; } = false;       // Imagen principal
+
+        // FK hacia el producto
+        public int ProductId { get; set; }
+        public ProductEntity Product { get; set; } = null!;
     }
 }

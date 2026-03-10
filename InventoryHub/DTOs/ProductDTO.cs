@@ -28,7 +28,7 @@ namespace InventoryHub.DTOs
         [StringLength(50)]
         public string? Model { get; set; }
 
-        [Range(0.01, 100000)]
+        [Range(0.01, 100000000)]
         public decimal Price { get; set; }
 
         [Range(0, 10000)]
@@ -42,7 +42,7 @@ namespace InventoryHub.DTOs
         public string? Description { get; set; }
 
         // Aquí va el array/lista de imágenes
-        public List<string> Images { get; set; } = new List<string>();
+        public List<ProductImageDTO> Images { get; set; } = new List<ProductImageDTO>();
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
@@ -62,10 +62,9 @@ namespace InventoryHub.DTOs
         [Range(3, 6)]
         public int? LedVolts { get; set; }
 
-        public LedType LedType { get; set; }
-
         [StringLength(20)]
         public string? Distribution { get; set; }
+        public LedType LedType { get; set; }
 
         [StringLength(200)]
         public string? Notes { get; set; }
@@ -80,5 +79,12 @@ namespace InventoryHub.DTOs
     {
         public int Id { get; set; }
         public string Name { get; set; } = null!;
+    }
+
+    public class ProductImageDTO
+    {
+        public string Url { get; set; } = null!;
+        public string PublicId { get; set; } = null!;
+        public bool IsMain { get; set; }
     }
 }

@@ -42,6 +42,7 @@ namespace InventoryHub.Repositories
         {
             return await _context.Products
                 .Include(p => p.Category)
+                .Include(p => p.Images)
                 .Include(p => p.LedDetails)
                     .ThenInclude(l => l.CompatibleTVs)
                 .ToListAsync();
@@ -52,6 +53,7 @@ namespace InventoryHub.Repositories
         {
             return await _context.Products
                 .Include(p => p.Category)
+                .Include(p => p.Images)
                 .Include(p => p.LedDetails)
                     .ThenInclude(l => l.CompatibleTVs)
                 .FirstOrDefaultAsync(p => p.Id == id);

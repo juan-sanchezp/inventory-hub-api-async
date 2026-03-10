@@ -3,6 +3,11 @@ using CloudinaryDotNet.Actions;
 
 namespace InventoryHub.Services.CloudinaryS
 {
+    public class CloudinaryUploadResult
+    {
+        public string Url { get; set; }
+        public string PublicId { get; set; }
+    }
     public class CloudinaryService
     {
         private readonly Cloudinary _cloudinary;
@@ -18,12 +23,14 @@ namespace InventoryHub.Services.CloudinaryS
             _cloudinary = new Cloudinary(account);
         }
 
-        public async Task<string> UploadImage(IFormFile file)
+        public async Task<CloudinaryUploadResult> UploadImage(IFormFile file)
         {
             await using var stream = file.OpenReadStream();
             var uploadParams = new ImageUploadParams
             {
-                File = new FileDescription(file.FileName, stream)
+                File = new FileDescription(file.FileName, stream),
+                // Opcional: Puedes especificar un PublicId personalizado
+                // PublicId = $"product_{Guid.NewGuid()}"
             };
 
             var result = await _cloudinary.UploadAsync(uploadParams);
@@ -31,7 +38,11 @@ namespace InventoryHub.Services.CloudinaryS
             if (result.Error != null)
                 throw new Exception($"Cloudinary error: {result.Error.Message}");
 
-            return result.SecureUrl?.ToString() ?? "";
+            return new CloudinaryUploadResult
+            {
+                Url = result.SecureUrl?.ToString() ?? "",
+                PublicId = result.PublicId // Cloudinary ya genera un PublicId automáticamente
+            };
         }
     }
 }

@@ -9,27 +9,35 @@ namespace InventoryHub.Mapping
     {
         public ProductMapper()
         {
-            // Product <-> ProductDTO
+            // Product -> DTO
             CreateMap<ProductEntity, ProductDTO>()
                 .ForMember(dest => dest.CategoryName,
-                           opt => opt.MapFrom(src => src.Category.Name))
-                .ForMember(dest => dest.LedDetails,
-                           opt => opt.MapFrom(src => src.LedDetails != null ? src.LedDetails : null));
+                    opt => opt.MapFrom(src => src.Category.Name));
 
+            // DTO -> Product
             CreateMap<ProductDTO, ProductEntity>()
                 .ForMember(dest => dest.LedDetails,
-                           opt => opt.Ignore()); // Lo manejas aparte en repo
+                    opt => opt.Ignore());
 
-            // LedDetails <-> LedDetailsDTO
+            // Images
+            CreateMap<ProductImageEntity, ProductImageDTO>()
+                .ReverseMap();
+
+            // LED details
             CreateMap<LedStripDetailsEntity, LedStripDetailsDTO>()
                 .ForMember(dest => dest.CompatibleTVModels,
-                           opt => opt.MapFrom(src => src.CompatibleTVs.Select(tv => tv.ModelCode).ToList()));
+                    opt => opt.MapFrom(src =>
+                        src.CompatibleTVs.Select(tv => tv.ModelCode)));
 
             CreateMap<LedStripDetailsDTO, LedStripDetailsEntity>()
                 .ForMember(dest => dest.CompatibleTVs,
-                           opt => opt.MapFrom(src => src.CompatibleTVModels != null
-                               ? src.CompatibleTVModels.Select(code => new TVModelEntity { ModelCode = code }).ToList()
-                               : new List<TVModelEntity>()));
+                    opt => opt.MapFrom(src =>
+                        src.CompatibleTVModels != null
+                            ? src.CompatibleTVModels.Select(code => new TVModelEntity
+                            {
+                                ModelCode = code
+                            })
+                            : new List<TVModelEntity>()));
         }
     }
 }

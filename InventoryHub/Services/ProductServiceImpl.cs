@@ -5,6 +5,7 @@ using InventoryHub.DTOs;
 using InventoryHub.Models;
 using InventoryHub.Repositories;
 using InventoryHub.Services.CloudinaryS;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryHub.Services
@@ -157,19 +158,35 @@ namespace InventoryHub.Services
         //}
         public async Task<List<string>> UploadProductImages(int productId, IFormFile[] files)
         {
-            ProductEntity product = await _productAccessBd.GetByIdAsync(productId);
-            //var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == productId);
-            if (product == null) throw new Exception("Producto no encontrado");
+            var product = await _productAccessBd.GetByIdAsync(productId);
+
+            if (product == null)
+                throw new Exception("Producto no encontrado");
 
             var urls = new List<string>();
+
             foreach (var file in files)
             {
-                var url = await _cloudinaryService.UploadImage(file);
-                urls.Add(url);
-                product.Images.Add(url); // directamente en List<string>
+                // Subir a Cloudinary
+                var result = await _cloudinaryService.UploadImage(file);
+
+                // Crear entidad imagen
+                var image = new ProductImageEntity
+                {
+                    Url = result.Url,
+                    PublicId = result.PublicId,
+                    ProductId = productId,
+                    IsMain = product.Images.Count == 0 // la primera será principal
+                };
+
+                product.Images.Add(image);
+                urls.Add(result.Url);
             }
 
+            product.UpdatedAt = DateTime.UtcNow;
+
             await _productAccessBd.UpdateAsync(product);
+
             return urls;
         }
 
@@ -177,48 +194,12 @@ namespace InventoryHub.Services
 
         public async Task<List<string>> ReplaceProductImages(int productId, IFormFile[] files)
         {
-            // Obtener el producto
-            var product = await _productAccessBd.GetByIdAsync(productId);
-            if (product == null) throw new Exception("Producto no encontrado");
 
-            // Si quieres, borrar las imágenes viejas del cloud
-            //foreach (var oldUrl in product.Images)
-            //{
-            //    await _cloudinaryService.UploadImage.destroy(oldUrl);
-            //}
-
-            // Limpiar lista local
-            product.Images.Clear();
-
-            var newUrls = new List<string>();
-            foreach (var file in files)
-            {
-                var url = await _cloudinaryService.UploadImage(file);
-                newUrls.Add(url);
-                product.Images.Add(url);
-            }
-
-            // Guardar cambios
-            await _productAccessBd.UpdateAsync(product);
-            return newUrls;
+            return null;
         }
 
         public async Task<bool> DeleteProductImage(int productId, string imageUrl)
         {
-            var product = await _productAccessBd.GetByIdAsync(productId);
-            if (product == null) throw new Exception("Producto no encontrado");
-
-            // Verificar que la imagen exista
-            if (!product.Images.Contains(imageUrl)) return false;
-
-            // Borrar del cloud
-            //await _cloudinaryService.DeleteImage(imageUrl);
-
-            // Borrar de la lista local
-            product.Images.Remove(imageUrl);
-
-            // Guardar cambios
-            await _productAccessBd.UpdateAsync(product);
             return true;
         }
 
