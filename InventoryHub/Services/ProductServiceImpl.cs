@@ -372,8 +372,51 @@ namespace InventoryHub.Services
             return result;
         }
 
+        public async Task<ProductDTO?> UpdateInfo(int id, UpdateProductInfoDTO dto)
+        {
+            var product = await _productAccessBd.GetByIdAsync(id);
 
+            if (product == null)
+                return null;
 
+            product.Name = dto.Name;
+            product.Brand = dto.Brand;
+            product.Model = dto.Model;
+            product.Description = dto.Description;
+            product.IsActive = dto.IsActive;
+
+            if (product.LedDetails != null && dto.LedDetails != null)
+            {
+                product.LedDetails.Inch = dto.LedDetails.Inch;
+                product.LedDetails.StripCount = dto.LedDetails.StripCount;
+                product.LedDetails.LengthMm = dto.LedDetails.LengthMm;
+                product.LedDetails.LedCount = dto.LedDetails.LedCount;
+                product.LedDetails.LedVolts = dto.LedDetails.LedVolts;
+                product.LedDetails.BoardCode = dto.LedDetails.BoardCode;
+                product.LedDetails.Distribution = dto.LedDetails.Distribution;
+                product.LedDetails.Notes = dto.LedDetails.Notes;
+
+                product.LedDetails.CompatibleTVs ??= new List<TVModelEntity>();
+
+                var led = product.LedDetails.CompatibleTVs; //led ya es una referencia a la lista 
+                led.Clear();
+
+                if (dto.LedDetails.CompatibleTVModels != null)
+                {
+                    foreach (var model in dto.LedDetails.CompatibleTVModels)
+                    {
+                        led.Add(new TVModelEntity
+                        {
+                            ModelCode = model
+                        });
+                    }
+                }
+            }
+
+            product.UpdatedAt = DateTime.UtcNow;
+            await _productAccessBd.UpdateAsync(product);
+            return _mapper.Map<ProductDTO>(product);
+        }
     }
 
 

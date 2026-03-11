@@ -13,6 +13,7 @@ namespace InventoryHub.Services
 
         Task<ProductDTO> Update(int id, ProductDTO productDTO);
         Task<ProductDTO> UpdateStockAsync(UpdateStockDTO dto);
+        Task<ProductDTO> UpdateInfo(int id, UpdateProductInfoDTO dto);
 
         Task<ProductDTO> DeleteById(int id);
 

@@ -74,6 +74,16 @@ namespace InventoryHub.Controllers
             return Ok(ResponseFactory.Success(updated, "Product updated successfully"));
         }
 
+        [HttpPut("{id}/info")]
+        public async Task<IActionResult> UpdateInfo(int id, UpdateProductInfoDTO dto)
+        {
+            var updated = await _service.UpdateInfo(id, dto);
+
+            if (updated == null)
+                return NotFound();
+
+            return Ok(updated);
+        }
         // PATCH: api/products/stock
         [HttpPatch("stock")]
         public async Task<IActionResult> UpdateStock([FromBody] UpdateStockDTO dto)

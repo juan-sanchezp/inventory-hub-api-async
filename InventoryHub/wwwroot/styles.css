@@ -1205,34 +1205,7 @@ td.td-price {
     border: 1px dashed var(--border);
 }
 
-/* Modal Footer */
-.modal-footer {
-    padding: 12px 26px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: flex-end;
-    background: var(--surface2);
-    flex-shrink: 0;
-}
 
-.btn-modal-close {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text2);
-    font-family: 'Outfit',sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 8px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.12s;
-}
-
-    .btn-modal-close:hover {
-        border-color: var(--border2);
-        color: var(--text);
-        background: var(--bg2);
-    }
 
 /* LIGHTBOX */
 #lightbox {
@@ -1378,4 +1351,7 @@ td.td-price {
         border-bottom: 1px solid var(--border);
         max-height: 260px;
     }
+
 }
+
+

@@ -6,9 +6,15 @@
     <title>Inventario — Tiras LED</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styleModal.css">
+    <!--<style>
+        .modal-footer {
+            border: 5px solid red !important;
+            justify-content: space-between;
+        }
+    </style>-->
 </head>
 <body>
-    <!-- (la estructura HTML se mantiene igual, solo cambian estilos y la sección de modelos) -->
     <aside class="sidebar">
         <div class="sidebar-logo">⚡</div>
         <a class="sidebar-icon active" title="Inventario">☰</a>
@@ -92,6 +98,7 @@
                 <button class="modal-close" onclick="closeModal()">✕</button>
             </div>
             <div class="modal-body">
+                <!-- Columna de visualización (detalles) -->
                 <div class="gallery-col">
                     <div class="main-img-wrap" onclick="openLightbox()">
                         <img id="main-image" src="" alt="Producto" loading="lazy">
@@ -105,8 +112,9 @@
                         <button onclick="selectImages()" class="btn-upload">📤 Subir imágenes</button>
                     </div>
                 </div>
+
+                <!-- Columna de información (detalles) -->
                 <div class="info-col">
-                    <!-- MODELOS DESTACADOS: NUEVO DISEÑO con más protagonismo -->
                     <div>
                         <div class="models-header">
                             <span class="models-title">📺 Modelos TV compatibles</span>
@@ -122,6 +130,7 @@
                             <div class="stock-box ok" id="m-stock-box"><div class="sb-lbl">Stock actual</div><div class="sb-val" id="m-stock">—</div><span class="sb-badge ok" id="m-stock-badge">—</span></div>
                         </div>
                     </div>
+
                     <div>
                         <div class="sec-label">Especificaciones técnicas</div>
                         <div class="specs-grid">
@@ -133,6 +142,7 @@
                             <div class="spec-card"><div class="sc2-lbl">Distribución</div><div class="sc2-val" id="s-dist" style="font-size:15px">—</div></div>
                         </div>
                     </div>
+
                     <div id="notes-sec" style="display:none"><div class="sec-label">Notas técnicas</div><div class="notes-box" id="s-notes"></div></div>
                     <div id="desc-sec" style="display:none"><div class="sec-label">Descripción</div><div style="font-size:14px;color:var(--text2);line-height:1.6" id="s-desc"></div></div>
 
@@ -143,13 +153,132 @@
                             <div class="code-block"><div class="cb-lbl">Barcode</div><div class="cb-val" id="s-barcode">—</div></div>
                         </div>
                     </div>
+                </div>
 
+                <!-- COLUMNA DE EDICIÓN (visible solo cuando se edita) -->
+                <div class="edit-col" id="edit-col" style="display: none;">
+                    <div class="edit-header">
+                        <span class="edit-title">✎ Editando producto</span>
+                        <span class="edit-subtitle" id="edit-code-ref">Código: <span id="edit-code-display">—</span></span>
+                    </div>
 
+                    <div class="edit-form">
+                        <!-- Información básica -->
+                        <div class="edit-section">
+                            <div class="edit-section-title">Información básica</div>
+                            <div class="edit-row">
+                                <div class="edit-field">
+                                    <label class="edit-label">Nombre del producto *</label>
+                                    <input type="text" id="edit-name" class="edit-input" placeholder="Ej: Tira LED Samsung 55 pulgadas">
+                                </div>
+                                <div class="edit-field">
+                                    <label class="edit-label">Marca *</label>
+                                    <input type="text" id="edit-brand" class="edit-input" placeholder="Ej: Samsung">
+                                </div>
+                            </div>
+                            <div class="edit-row">
+                                <div class="edit-field">
+                                    <label class="edit-label">Modelo *</label>
+                                    <input type="text" id="edit-model" class="edit-input" placeholder="Ej: UE55NU7100">
+                                </div>
+                                <div class="edit-field">
+                                    <label class="edit-label">Código de barras</label>
+                                    <input type="text" id="edit-barcode" class="edit-input" placeholder="Ej: 8801643705555">
+                                </div>
+                            </div>
+                            <div class="edit-row">
+                                <div class="edit-field">
+                                    <label class="edit-label">Precio *</label>
+                                    <input type="number" id="edit-price" class="edit-input" step="0.01" min="0" placeholder="0.00">
+                                </div>
+                                <div class="edit-field">
+                                    <label class="edit-label">Stock actual *</label>
+                                    <input type="number" id="edit-stock" class="edit-input" min="0" placeholder="0">
+                                </div>
+                                <div class="edit-field">
+                                    <label class="edit-label">Stock mínimo *</label>
+                                    <input type="number" id="edit-minStock" class="edit-input" min="0" placeholder="5">
+                                </div>
+                            </div>
+                        </div>
 
+                        <!-- Especificaciones técnicas -->
+                        <div class="edit-section">
+                            <div class="edit-section-title">Especificaciones técnicas</div>
+                            <div class="edit-row">
+                                <div class="edit-field">
+                                    <label class="edit-label">Pulgadas</label>
+                                    <input type="number" id="edit-inch" class="edit-input" placeholder="55">
+                                </div>
+                                <div class="edit-field">
+                                    <label class="edit-label">Voltaje (V)</label>
+                                    <input type="number" id="edit-volts" class="edit-input" placeholder="3">
+                                </div>
+                                <div class="edit-field">
+                                    <label class="edit-label">N° de tiras</label>
+                                    <input type="number" id="edit-stripCount" class="edit-input" placeholder="12">
+                                </div>
+                            </div>
+                            <div class="edit-row">
+                                <div class="edit-field">
+                                    <label class="edit-label">LEDs por tira</label>
+                                    <input type="number" id="edit-ledCount" class="edit-input" placeholder="8">
+                                </div>
+                                <div class="edit-field">
+                                    <label class="edit-label">Longitud (mm)</label>
+                                    <input type="number" id="edit-length" class="edit-input" placeholder="580">
+                                </div>
+                                <div class="edit-field">
+                                    <label class="edit-label">Distribución</label>
+                                    <input type="text" id="edit-distribution" class="edit-input" placeholder="Ej: 3A, 2A+1B">
+                                </div>
+                            </div>
+                            <div class="edit-row">
+                                <div class="edit-field full-width">
+                                    <label class="edit-label">Board Code</label>
+                                    <input type="text" id="edit-boardCode" class="edit-input" placeholder="Ej: BN44-00878A">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modelos compatibles -->
+                        <div class="edit-section">
+                            <div class="edit-section-title">Modelos de TV compatibles</div>
+                            <div class="edit-field full-width">
+                                <label class="edit-label">Ingresa los modelos separados por coma</label>
+                                <input type="text" id="edit-models" class="edit-input" placeholder="Ej: 55NU7100, 55NU7300, 55NU7400">
+                                <small class="edit-hint">Ejemplo: 32LN5400, 32LM3400, 32LB580</small>
+                            </div>
+                        </div>
+
+                        <!-- Notas y descripción -->
+                        <div class="edit-section">
+                            <div class="edit-section-title">Notas y descripción</div>
+                            <div class="edit-field full-width">
+                                <label class="edit-label">Notas técnicas</label>
+                                <textarea id="edit-notes" class="edit-textarea" rows="2" placeholder="Información adicional sobre las tiras..."></textarea>
+                            </div>
+                            <div class="edit-field full-width">
+                                <label class="edit-label">Descripción del producto</label>
+                                <textarea id="edit-description" class="edit-textarea" rows="3" placeholder="Descripción detallada..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Estado activo (isActive) -->
+                        <div class="edit-section">
+                            <div class="edit-field checkbox-field">
+                                <input type="checkbox" id="edit-isActive" checked>
+                                <label for="edit-isActive">Producto activo (visible en inventario)</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer">
+
+            <!-- Footer del modal (cambia según el modo) -->
+            <div class="modal-footer" id="modal-footer">
                 <button class="btn-modal-close" onclick="closeModal()">Cerrar</button>
+                <!-- El botón de editar se añade dinámicamente con JavaScript -->
             </div>
         </div>
     </div>
@@ -164,42 +293,96 @@
     </div>
 
     <script>
-        // (script idéntico al original, sin cambios funcionales)
+        // Variables globales
         let currentImages = [], currentIdx = 0;
-        function esc(s) { return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+        let currentProductId = null;
+        let currentProduct = null; // Guardamos el producto completo para edición
+
+        // Función de escape para HTML
+        function esc(s) {
+            return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // Renderizar productos en la tabla
         function renderProducts(products) {
             const tbody = document.getElementById("product-table"), empty = document.getElementById("empty-state");
             tbody.innerHTML = "";
-            const total = products.length, withStock = products.filter(p => p.stock > p.minStock).length, lowStock = products.filter(p => p.stock > 0 && p.stock <= p.minStock).length, noStock = products.filter(p => p.stock === 0).length;
-            document.getElementById("stat-total").textContent = total; document.getElementById("stat-stock").textContent = withStock; document.getElementById("stat-low").textContent = lowStock; document.getElementById("stat-zero").textContent = noStock;
+
+            const total = products.length;
+            const withStock = products.filter(p => p.stock > p.minStock).length;
+            const lowStock = products.filter(p => p.stock > 0 && p.stock <= p.minStock).length;
+            const noStock = products.filter(p => p.stock === 0).length;
+
+            document.getElementById("stat-total").textContent = total;
+            document.getElementById("stat-stock").textContent = withStock;
+            document.getElementById("stat-low").textContent = lowStock;
+            document.getElementById("stat-zero").textContent = noStock;
             document.getElementById("results-count").textContent = total + " producto" + (total !== 1 ? "s" : "");
-            if (total) { document.getElementById("bar-stock").style.width = (withStock / total * 100) + "%"; document.getElementById("bar-low").style.width = (lowStock / total * 100) + "%"; document.getElementById("bar-zero").style.width = (noStock / total * 100) + "%"; }
-            if (!total) { empty.style.display = ""; return; }
+
+            if (total) {
+                document.getElementById("bar-stock").style.width = (withStock / total * 100) + "%";
+                document.getElementById("bar-low").style.width = (lowStock / total * 100) + "%";
+                document.getElementById("bar-zero").style.width = (noStock / total * 100) + "%";
+            }
+
+            if (!total) {
+                empty.style.display = "";
+                return;
+            }
+
             empty.style.display = "none";
             const frag = document.createDocumentFragment();
+
             products.forEach(p => {
-                const led = p.ledDetails, imgUrl = p.images?.length ? (p.images.find(x => x.isMain)?.url || p.images[0].url) : "https://placehold.co/44x44/eef0f8/8b92b0?text=LED", isLow = p.stock <= p.minStock, tr = document.createElement("tr");
-                tr.innerHTML = `<td><img src="${esc(imgUrl)}" class="product-img" loading="lazy"></td><td class="td-code">${esc(p.code)}</td><td class="td-name">${esc(p.name)}</td><td><div style="font-weight:600;color:var(--text)">${esc(p.brand)}</div><div style="font-size:12px;font-family:'Space Mono',monospace;color:var(--muted);margin-top:2px">${esc(p.model)}</div></td><td><span class="chip chip-blue">${led?.ledCount ?? "—"} LEDs · ${led?.stripCount ?? "—"} tiras</span></td><td><span class="chip chip-gray">${led?.ledVolts ?? "—"}V</span></td><td style="font-family:'Space Mono',monospace;font-size:13px;color:var(--text2)">${led?.inch ?? "—"}″</td><td class="td-price">$${p.price.toLocaleString("es-CO")}</td><td><span class="badge ${isLow ? 'badge-red' : 'badge-green'}">${p.stock} uds</span></td><td><button class="btn-ver">Ver</button></td>`;
+                const led = p.ledDetails;
+                const imgUrl = p.images?.length ? (p.images.find(x => x.isMain)?.url || p.images[0].url) : "https://placehold.co/44x44/eef0f8/8b92b0?text=LED";
+                const isLow = p.stock <= p.minStock;
+                const tr = document.createElement("tr");
+
+                tr.innerHTML = `
+                        <td><img src="${esc(imgUrl)}" class="product-img" loading="lazy"></td>
+                        <td class="td-code">${esc(p.code)}</td>
+                        <td class="td-name">${esc(p.name)}</td>
+                        <td>
+                            <div style="font-weight:600;color:var(--text)">${esc(p.brand)}</div>
+                            <div style="font-size:12px;font-family:'Space Mono',monospace;color:var(--muted);margin-top:2px">${esc(p.model)}</div>
+                        </td>
+                        <td><span class="chip chip-blue">${led?.ledCount ?? "—"} LEDs · ${led?.stripCount ?? "—"} tiras</span></td>
+                        <td><span class="chip chip-gray">${led?.ledVolts ?? "—"}V</span></td>
+                        <td style="font-family:'Space Mono',monospace;font-size:13px;color:var(--text2)">${led?.inch ?? "—"}″</td>
+                        <td class="td-price">$${p.price.toLocaleString("es-CO")}</td>
+                        <td><span class="badge ${isLow ? 'badge-red' : 'badge-green'}">${p.stock} uds</span></td>
+                        <td><button class="btn-ver">Ver</button></td>
+                    `;
+
                 tr.querySelector(".btn-ver").addEventListener("click", () => showProduct(p));
                 frag.appendChild(tr);
             });
+
             tbody.appendChild(frag);
         }
-        let currentProductId = null;
+
+        // Mostrar producto en el modal
         function showProduct(p) {
-            currentProductId = p.id; // 👈 agrega esta línea
+            currentProductId = p.id;
+            currentProduct = p; // Guardamos para edición
+
             const led = p.ledDetails;
+
+            // Actualizar campos de visualización
             document.getElementById("modal-title").textContent = p.name;
             document.getElementById("m-category").textContent = p.categoryName || "Tiras LED";
             document.getElementById("m-code").textContent = p.code;
             document.getElementById("m-brand").textContent = p.brand;
             document.getElementById("m-model").textContent = p.model;
             document.getElementById("m-price").textContent = "$" + p.price.toLocaleString("es-CO");
+
             const isLow = p.stock <= p.minStock;
             document.getElementById("m-stock").textContent = p.stock;
             document.getElementById("m-stock-box").className = "stock-box " + (isLow ? "low" : "ok");
             document.getElementById("m-stock-badge").className = "sb-badge " + (isLow ? "low" : "ok");
             document.getElementById("m-stock-badge").textContent = isLow ? "⚠ STOCK BAJO" : "✓ DISPONIBLE";
+
             document.getElementById("s-inch").innerHTML = (led?.inch ?? "—") + '<span class="sc2-unit">″</span>';
             document.getElementById("s-volts").innerHTML = (led?.ledVolts ?? "—") + '<span class="sc2-unit">V</span>';
             document.getElementById("s-strips").textContent = led?.stripCount ?? "—";
@@ -208,40 +391,297 @@
             document.getElementById("s-dist").textContent = led?.distribution ?? "—";
             document.getElementById("s-board").textContent = led?.boardCode ?? "—";
             document.getElementById("s-barcode").textContent = p.barcode ?? "—";
-            const ns = document.getElementById("notes-sec"); if (led?.notes) { document.getElementById("s-notes").textContent = led.notes; ns.style.display = ""; } else ns.style.display = "none";
-            const ds = document.getElementById("desc-sec"); if (p.description) { document.getElementById("s-desc").textContent = p.description; ds.style.display = ""; } else ds.style.display = "none";
-            const ml = document.getElementById("model-list"), models = led?.compatibleTVModels || [];
+
+            const ns = document.getElementById("notes-sec");
+            if (led?.notes) {
+                document.getElementById("s-notes").textContent = led.notes;
+                ns.style.display = "";
+            } else {
+                ns.style.display = "none";
+            }
+
+            const ds = document.getElementById("desc-sec");
+            if (p.description) {
+                document.getElementById("s-desc").textContent = p.description;
+                ds.style.display = "";
+            } else {
+                ds.style.display = "none";
+            }
+
+            const ml = document.getElementById("model-list");
+            const models = led?.compatibleTVModels || [];
             document.getElementById("m-model-count").textContent = models.length;
             ml.innerHTML = "";
+
             if (models.length) {
                 const f = document.createDocumentFragment();
-                models.forEach(m => { const card = document.createElement("div"); card.className = "model-card"; card.textContent = m; f.appendChild(card); });
+                models.forEach(m => {
+                    const card = document.createElement("div");
+                    card.className = "model-card";
+                    card.textContent = m;
+                    f.appendChild(card);
+                });
                 ml.appendChild(f);
-            } else { ml.innerHTML = '<span class="models-empty">Sin modelos registrados</span>'; }
+            } else {
+                ml.innerHTML = '<span class="models-empty">Sin modelos registrados</span>';
+            }
+
+            // Imágenes
             currentImages = p.images || [];
             currentIdx = Math.max(0, currentImages.findIndex(i => i.isMain));
             buildGallery();
+
+            // Configurar el footer con botón de editar
+            const footer = document.getElementById("modal-footer");
+            footer.innerHTML = `
+             <button class="btn-edit" onclick="openEditModal()">✎ Editar producto</button>
+            <button class="btn-modal-close" onclick="closeModal()">Cerrar</button>`;
+
+            // Asegurar que la vista de detalles esté visible y la de edición oculta
+            document.querySelector('.gallery-col').style.display = 'flex';
+            document.querySelector('.info-col').style.display = 'block';
+            document.getElementById('edit-col').style.display = 'none';
+
             document.getElementById("modal").classList.add("open");
             document.body.style.overflow = "hidden";
         }
+
+        // Construir galería de imágenes
         function buildGallery() {
-            const wrap = document.getElementById("thumbnails"); wrap.innerHTML = "";
-            if (!currentImages.length) { document.getElementById("main-image").src = "https://placehold.co/280x280/f7f8fc/8b92b0?text=Sin+imagen"; document.getElementById("img-counter").style.display = "none"; document.getElementById("main-badge").style.display = "none"; return; }
+            const wrap = document.getElementById("thumbnails");
+            wrap.innerHTML = "";
+
+            if (!currentImages.length) {
+                document.getElementById("main-image").src = "https://placehold.co/280x280/f7f8fc/8b92b0?text=Sin+imagen";
+                document.getElementById("img-counter").style.display = "none";
+                document.getElementById("main-badge").style.display = "none";
+                return;
+            }
+
             setMainImg(currentIdx);
             const f = document.createDocumentFragment();
-            currentImages.forEach((img, i) => { const d = document.createElement("div"); d.className = "thumb" + (i === currentIdx ? " active" : ""); const im = new Image(); im.src = img.url; im.loading = "lazy"; d.appendChild(im); d.addEventListener("click", () => setMainImg(i)); f.appendChild(d); });
+
+            currentImages.forEach((img, i) => {
+                const d = document.createElement("div");
+                d.className = "thumb" + (i === currentIdx ? " active" : "");
+                const im = new Image();
+                im.src = img.url;
+                im.loading = "lazy";
+                d.appendChild(im);
+                d.addEventListener("click", () => setMainImg(i));
+                f.appendChild(d);
+            });
+
             wrap.appendChild(f);
         }
+
         function setMainImg(i) {
-            currentIdx = i; const img = currentImages[i];
+            currentIdx = i;
+            const img = currentImages[i];
             document.getElementById("main-image").src = img.url;
+
             const ctr = document.getElementById("img-counter");
-            if (currentImages.length > 1) { ctr.textContent = (i + 1) + "/" + currentImages.length; ctr.style.display = ""; } else ctr.style.display = "none";
+            if (currentImages.length > 1) {
+                ctr.textContent = (i + 1) + "/" + currentImages.length;
+                ctr.style.display = "";
+            } else {
+                ctr.style.display = "none";
+            }
+
             document.getElementById("main-badge").style.display = img.isMain ? "" : "none";
             document.querySelectorAll(".thumb").forEach((t, j) => t.classList.toggle("active", j === i));
         }
-        function closeModal() { document.getElementById("modal").classList.remove("open"); document.body.style.overflow = ""; }
-        function handleModalBg(e) { if (e.target === document.getElementById("modal")) closeModal(); }
+
+        // Abrir modal de edición
+        function openEditModal() {
+            if (!currentProduct) return;
+
+            // Ocultar vistas de detalle
+            document.querySelector('.gallery-col').style.display = 'none';
+            document.querySelector('.info-col').style.display = 'none';
+
+            // Mostrar vista de edición
+            document.getElementById('edit-col').style.display = 'flex';
+
+            // Cambiar footer
+            const footer = document.getElementById("modal-footer");
+            footer.innerHTML = `
+                    <button class="btn-cancel" onclick="closeEditMode()">Cancelar</button>
+                    <button class="btn-save" onclick="saveProductChanges()">💾 Guardar cambios</button>
+                `;
+
+            // Cargar datos en el formulario
+            loadProductDataToEdit();
+        }
+
+        // Cargar datos del producto actual al formulario de edición
+        function loadProductDataToEdit() {
+            const p = currentProduct;
+            if (!p) return;
+
+            const led = p.ledDetails || {};
+
+            // Información básica
+            document.getElementById('edit-name').value = p.name || '';
+            document.getElementById('edit-brand').value = p.brand || '';
+            document.getElementById('edit-model').value = p.model || '';
+            document.getElementById('edit-barcode').value = p.barcode || '';
+            document.getElementById('edit-price').value = p.price || '';
+            document.getElementById('edit-stock').value = p.stock || '';
+            document.getElementById('edit-minStock').value = p.minStock || '';
+
+            // Especificaciones técnicas
+            document.getElementById('edit-inch').value = led.inch || '';
+            document.getElementById('edit-volts').value = led.ledVolts || '';
+            document.getElementById('edit-stripCount').value = led.stripCount || '';
+            document.getElementById('edit-ledCount').value = led.ledCount || '';
+            document.getElementById('edit-length').value = led.lengthMm || '';
+            document.getElementById('edit-distribution').value = led.distribution || '';
+            document.getElementById('edit-boardCode').value = led.boardCode || '';
+
+            // Modelos compatibles (convertir array a string separado por comas)
+            if (led.compatibleTVModels && Array.isArray(led.compatibleTVModels)) {
+                document.getElementById('edit-models').value = led.compatibleTVModels.join(', ');
+            } else {
+                document.getElementById('edit-models').value = '';
+            }
+
+            // Notas y descripción
+            document.getElementById('edit-notes').value = led.notes || '';
+            document.getElementById('edit-description').value = p.description || '';
+
+            // Estado activo
+            document.getElementById('edit-isActive').checked = p.isActive !== false; // Por defecto true
+
+            // Mostrar código de referencia
+            document.getElementById('edit-code-display').textContent = p.code || '—';
+        }
+
+        // Cerrar modo edición y volver a vista de detalles
+        function closeEditMode() {
+            // Ocultar vista de edición
+            document.getElementById('edit-col').style.display = 'none';
+
+            // Mostrar vistas de detalle
+            document.querySelector('.gallery-col').style.display = 'flex';
+            document.querySelector('.info-col').style.display = 'block';
+
+            // Restaurar footer
+            const footer = document.getElementById("modal-footer");
+            footer.innerHTML = `        
+                    <button class="btn-edit" onclick="openEditModal()">✎ Editar producto</button>
+                    <button class="btn-modal-close" onclick="closeModal()">Cerrar</button>
+                `;
+        }
+
+        // Guardar cambios del producto
+        async function saveProductChanges() {
+            const saveButton = document.querySelector('#modal-footer .btn-save');
+
+            // Deshabilitar botón y cambiar texto
+            saveButton.disabled = true;
+            const originalText = saveButton.textContent;
+            saveButton.textContent = 'Guardando...';
+
+            try {
+                // Construir objeto con los datos actualizados según tu endpoint
+                const updatedData = {
+                    name: document.getElementById('edit-name').value.trim(),
+                    brand: document.getElementById('edit-brand').value.trim(),
+                    model: document.getElementById('edit-model').value.trim(),
+                    description: document.getElementById('edit-description').value.trim() || null,
+                    isActive: document.getElementById('edit-isActive').checked,
+                    ledDetails: {
+                        inch: parseInt(document.getElementById('edit-inch').value) || 0,
+                        stripCount: parseInt(document.getElementById('edit-stripCount').value) || 0,
+                        lengthMm: parseInt(document.getElementById('edit-length').value) || 0,
+                        ledCount: parseInt(document.getElementById('edit-ledCount').value) || 0,
+                        ledVolts: parseInt(document.getElementById('edit-volts').value) || 0,
+                        boardCode: document.getElementById('edit-boardCode').value.trim() || null,
+                        distribution: document.getElementById('edit-distribution').value.trim() || null,
+                        notes: document.getElementById('edit-notes').value.trim() || null,
+                        compatibleTVModels: document.getElementById('edit-models').value
+                            .split(',')
+                            .map(s => s.trim())
+                            .filter(s => s.length > 0)
+                    }
+                };
+
+                // Validar campos requeridos
+                if (!updatedData.name || !updatedData.brand || !updatedData.model) {
+                    throw new Error('Nombre, marca y modelo son campos requeridos');
+                }
+
+                // Enviar al endpoint PUT /api/products/{id}/info
+                const response = await fetch(`https://localhost:7266/api/products/${currentProductId}/info`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'accept': '*/*'
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Error al guardar: ${response.status} - ${errorText}`);
+                }
+
+                // Si la respuesta es exitosa (204 No Content o 200 OK)
+                if (response.status !== 204) {
+                    // Si devuelve datos, actualizamos currentProduct
+                    try {
+                        const updatedProduct = await response.json();
+                        currentProduct = updatedProduct;
+                    } catch (e) {
+                        // Si no hay JSON, obtenemos el producto actualizado
+                        await refreshCurrentProduct();
+                    }
+                } else {
+                    // Si es 204, recargamos el producto actual
+                    await refreshCurrentProduct();
+                }
+
+                // Actualizar la vista de detalles con los nuevos datos
+                showProduct(currentProduct);
+
+                // Recargar la tabla para reflejar cambios
+                loadAll();
+
+                alert('Producto guardado exitosamente');
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Error: ${error.message}`);
+
+                // Rehabilitar botón
+                saveButton.disabled = false;
+                saveButton.textContent = originalText;
+            }
+        }
+
+        // Refrescar el producto actual desde la API
+        async function refreshCurrentProduct() {
+            try {
+                const response = await fetch(`/api/products/${currentProductId}`);
+                if (response.ok) {
+                    currentProduct = await response.json();
+                }
+            } catch (e) {
+                console.warn('No se pudo refrescar el producto:', e);
+            }
+        }
+
+        // Funciones de modal y lightbox existentes
+        function closeModal() {
+            document.getElementById("modal").classList.remove("open");
+            document.body.style.overflow = "";
+        }
+
+        function handleModalBg(e) {
+            if (e.target === document.getElementById("modal")) closeModal();
+        }
+
         function openLightbox() {
             if (!currentImages.length) return;
             document.getElementById("lightbox-img").src = currentImages[currentIdx].url;
@@ -252,22 +692,44 @@
             document.getElementById("lb-next").style.display = many ? "flex" : "none";
             document.getElementById("lightbox").classList.add("open");
         }
-        function closeLightbox() { document.getElementById("lightbox").classList.remove("open"); }
-        function handleLightboxBg(e) { if (e.target === document.getElementById("lightbox")) closeLightbox(); }
+
+        function closeLightbox() {
+            document.getElementById("lightbox").classList.remove("open");
+        }
+
+        function handleLightboxBg(e) {
+            if (e.target === document.getElementById("lightbox")) closeLightbox();
+        }
+
         function lbNav(dir) {
             currentIdx = (currentIdx + dir + currentImages.length) % currentImages.length;
             const el = document.getElementById("lightbox-img");
-            el.className = ""; requestAnimationFrame(() => { el.src = currentImages[currentIdx].url; el.className = "lb-enter"; });
-            updateLightboxMeta(); setMainImg(currentIdx);
+            el.className = "";
+            requestAnimationFrame(() => {
+                el.src = currentImages[currentIdx].url;
+                el.className = "lb-enter";
+            });
+            updateLightboxMeta();
+            setMainImg(currentIdx);
         }
+
         function updateLightboxMeta() {
             document.getElementById("lb-counter").textContent = (currentIdx + 1) + " / " + currentImages.length;
             document.getElementById("lb-caption").textContent = currentImages[currentIdx].isMain ? "PRINCIPAL" : "IMAGEN " + (currentIdx + 1);
         }
-        function loadAll() { fetch("/api/products").then(r => r.json()).then(d => renderProducts(d.data)).catch(() => renderProducts([])); }
+
+        // Funciones de búsqueda
+        function loadAll() {
+            fetch("/api/products")
+                .then(r => r.json())
+                .then(d => renderProducts(d.data))
+                .catch(() => renderProducts([]));
+        }
+
         function doSearch() {
             const params = new URLSearchParams();
             const v = id => document.getElementById(id).value.trim();
+
             if (v("search")) params.append("Search", v("search"));
             if (v("tvModel")) params.append("CompatibleTVModel", v("tvModel"));
             if (v("inch")) params.append("Inch", v("inch"));
@@ -275,35 +737,31 @@
             if (v("ledCount")) params.append("LedCount", v("ledCount"));
             if (v("volts")) params.append("LedVolts", v("volts"));
             if (v("boardCode")) params.append("BoardCode", v("boardCode"));
-            fetch("/api/products/led-strips/search?" + params.toString()).then(r => r.json()).then(d => renderProducts(d.data)).catch(() => renderProducts([]));
+
+            fetch("/api/products/led-strips/search?" + params.toString())
+                .then(r => r.json())
+                .then(d => renderProducts(d.data))
+                .catch(() => renderProducts([]));
         }
+
         function clearSearch() {
             ["search", "tvModel", "inch", "stripCount", "ledCount", "boardCode"].forEach(id => document.getElementById(id).value = "");
-            document.getElementById("volts").value = ""; loadAll();
+            document.getElementById("volts").value = "";
+            loadAll();
         }
-        document.addEventListener("keydown", e => {
-            const lbOpen = document.getElementById("lightbox").classList.contains("open");
-            if (e.key === "Escape") { lbOpen ? closeLightbox() : closeModal(); return; }
-            if (lbOpen) { if (e.key === "ArrowLeft") lbNav(-1); if (e.key === "ArrowRight") lbNav(1); }
-            if (e.key === "Enter" && !document.getElementById("modal").classList.contains("open") && !lbOpen && document.activeElement !== document.getElementById("topbar-search")) doSearch();
-        });
-        document.getElementById("topbar-search").addEventListener("keydown", e => { if (e.key === "Enter") { document.getElementById("search").value = e.target.value; doSearch(); } });
 
-
+        // Subir imágenes
         function selectImages() {
             document.getElementById("uploadImagesInput").click();
         }
-        document.getElementById("uploadImagesInput").addEventListener("change", uploadImages);
-        function uploadImages(event) {
 
+        document.getElementById("uploadImagesInput").addEventListener("change", function (event) {
             const files = event.target.files;
-
             if (!files.length) return;
 
             const formData = new FormData();
-
             for (let i = 0; i < files.length; i++) {
-                formData.append("files", files[i]); // 👈 igual que tu test
+                formData.append("files", files[i]);
             }
 
             fetch(`https://localhost:7266/api/products/${currentProductId}/images`, {
@@ -311,34 +769,48 @@
                 body: formData
             })
                 .then(async r => {
-
                     if (!r.ok) {
                         const text = await r.text();
                         throw new Error(text);
                     }
-
                     return r.json();
-
                 })
                 .then(images => {
-
                     alert("Imágenes subidas correctamente");
-
                     currentImages = images;
                     currentIdx = 0;
-
                     buildGallery();
-
                 })
                 .catch(err => {
-
                     console.error(err);
                     alert("Error: " + err.message);
-
                 });
+        });
 
-        }
+        // Event listeners
+        document.addEventListener("keydown", e => {
+            const lbOpen = document.getElementById("lightbox").classList.contains("open");
+            if (e.key === "Escape") {
+                lbOpen ? closeLightbox() : closeModal();
+                return;
+            }
+            if (lbOpen) {
+                if (e.key === "ArrowLeft") lbNav(-1);
+                if (e.key === "ArrowRight") lbNav(1);
+            }
+            if (e.key === "Enter" && !document.getElementById("modal").classList.contains("open") && !lbOpen && document.activeElement !== document.getElementById("topbar-search")) {
+                doSearch();
+            }
+        });
 
+        document.getElementById("topbar-search").addEventListener("keydown", e => {
+            if (e.key === "Enter") {
+                document.getElementById("search").value = e.target.value;
+                doSearch();
+            }
+        });
+
+        // Cargar datos iniciales
         loadAll();
     </script>
 </body>
