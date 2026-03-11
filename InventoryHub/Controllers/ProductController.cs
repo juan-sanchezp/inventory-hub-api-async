@@ -1,10 +1,10 @@
 ﻿using InventoryHub.DTOs;
 using InventoryHub.Responses;
 using InventoryHub.Services;
-using InventoryHub.Services.CloudinaryS;
+using InventoryHub.Services.ImportsExports;
 using Microsoft.AspNetCore.Mvc;
-using OfficeOpenXml;
-using System.ComponentModel;
+
+
 
 
 namespace InventoryHub.Controllers
@@ -16,10 +16,13 @@ namespace InventoryHub.Controllers
     {
         private readonly IProductService _service;
         //private readonly CloudinaryService _cloudinaryService;
-        public ProductController(IProductService service)
+        private readonly ProductExcelService _productExcelService;
+        public ProductController(
+            IProductService service,
+            ProductExcelService productExcelService)
         {
             _service = service;
-          
+            _productExcelService = productExcelService;
         }
 
 
@@ -158,9 +161,7 @@ namespace InventoryHub.Controllers
 
         // Borrar una imagen específica por su ID o URL
         [HttpDelete("{productId}/images")]
-        public async Task<IActionResult> DeleteProductImage(
-            int productId,
-            [FromQuery] string publicId)
+        public async Task<IActionResult> DeleteProductImage(int productId,[FromQuery] string publicId)
         {
             if (string.IsNullOrEmpty(publicId))
                 return BadRequest("Se requiere la URL de la imagen");
@@ -171,7 +172,6 @@ namespace InventoryHub.Controllers
 
             return Ok(ResponseFactory.Success("Imagen eliminada correctamente"));
         }
-
 
 
         [HttpPost("test-upload")]
@@ -208,57 +208,86 @@ namespace InventoryHub.Controllers
             });
         }
 
+        [HttpPost("import-StockExcel")]
+        public async Task<IActionResult> ImportStockExcell(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("Archivo Excel vacío");
+
+            var result = await _service.ImportStockProductExcell(file);
+
+            return Ok(new
+            {
+                success = true,
+                message = "Importación finalizada",
+                created = result.Created,
+                duplicates = result.Duplicates,
+                result.Products
+            });
+        }
 
         [HttpGet("download-excel-template")]
-        public IActionResult DownloadExcelTemplate()
+        public async Task<IActionResult> DownloadExcelTemplate()
         {
+            var (fileContent, fileName) = await _productExcelService.DownloadExcelTemplateAsync();
 
-            using var package = new ExcelPackage();
-            var sheet = package.Workbook.Worksheets.Add("Productos");
-
-            // Encabezados
-            string[] headers = new[]
-            {
-        "code", "barcode", "name", "categoryName", "brand", "model",
-        "price", "stock", "minStock", "description",
-        "inch", "stripCount", "lengthMm", "ledCount", "ledVolts",
-        "boardCode", "distribution", "ledType", "notes", "compatibleTVModels"
-    };
-
-            for (int i = 0; i < headers.Length; i++)
-            {
-                sheet.Cells[1, i + 1].Value = headers[i];
-                sheet.Column(i + 1).AutoFit();
-                sheet.Cells[1, i + 1].Style.Font.Bold = true;
-            }
-
-            // Ejemplo de fila
-            string[] exampleRow = new[]
-            {
-        "H65-3", "7896541230987", "Tiras LED Curvas LG", "Tiras LED", "HYLED", "JS-D-JP65DM-C72FG",
-        "120000", "6", "2", "Tira LED para TV de 65 pulgadas",
-        "65", "12", "800", "8", "6",
-        "HY65-CB12", "(3A+3B)", "0", "Cada tira tiene 8 LEDs", "HYLED6518INTM,65DM1200,65XLEDPRO"
-    };
-
-            for (int i = 0; i < exampleRow.Length; i++)
-            {
-                sheet.Cells[2, i + 1].Value = exampleRow[i];
-            }
-
-            // Comentario de LedType
-            sheet.Cells[1, 18].AddComment("Valores posibles: Normal=0, Cuadrado=1, SinLente=2", "Sistema");
-
-            var stream = new MemoryStream();
-            package.SaveAs(stream);
-            stream.Position = 0;
-
-            string excelName = $"Plantilla_Productos_{DateTime.UtcNow:yyyyMMdd_HHmmss}.xlsx";
-
-            return File(stream,
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        excelName);
+            return File(
+                fileContent,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                fileName
+            );
         }
+
+        //    [HttpGet("download-excel-template")]
+        //    public IActionResult DownloadExcelTemplate()
+        //    {
+
+        //        using var package = new ExcelPackage();
+        //        var sheet = package.Workbook.Worksheets.Add("Productos");
+
+        //        // Encabezados
+        //        string[] headers = new[]
+        //        {
+        //    "code", "barcode", "name", "categoryName", "brand", "model",
+        //    "price", "minStock", "description",
+        //    "inch", "stripCount", "lengthMm", "ledCount", "ledVolts",
+        //    "boardCode", "distribution", "ledType", "notes", "compatibleTVModels"
+        //};
+
+        //        for (int i = 0; i < headers.Length; i++)
+        //        {
+        //            sheet.Cells[1, i + 1].Value = headers[i];
+        //            sheet.Column(i + 1).AutoFit();
+        //            sheet.Cells[1, i + 1].Style.Font.Bold = true;
+        //        }
+
+        //        // Ejemplo de fila
+        //        string[] exampleRow = new[]
+        //        {
+        //    "H65-3", "7896541230987", "Tiras LED Curvas LG", "Tiras LED", "HYLED", "JS-D-JP65DM-C72FG",
+        //    "120000", "2", "Tira LED para TV de 65 pulgadas",
+        //    "65", "12", "800", "8", "6",
+        //    "HY65-CB12", "(3A+3B)", "0", "Cada tira tiene 8 LEDs", "HYLED6518INTM,65DM1200,65XLEDPRO"
+        //};
+
+        //        for (int i = 0; i < exampleRow.Length; i++)
+        //        {
+        //            sheet.Cells[2, i + 1].Value = exampleRow[i];
+        //        }
+
+        //        // Comentario de LedType
+        //        sheet.Cells[1, 18].AddComment("Valores posibles: Normal=0, Cuadrado=1, SinLente=2", "Sistema");
+
+        //        var stream = new MemoryStream();
+        //        package.SaveAs(stream);
+        //        stream.Position = 0;
+
+        //        string excelName = $"Plantilla_Productos_{DateTime.UtcNow:yyyyMMdd_HHmmss}.xlsx";
+
+        //        return File(stream,
+        //                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        //                    excelName);
+        //    }
 
     }
 

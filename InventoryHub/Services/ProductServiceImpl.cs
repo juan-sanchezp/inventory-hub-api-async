@@ -1,13 +1,11 @@
 ﻿using AutoMapper;
-using CloudinaryDotNet;
-using ExcelDataReader;
 using InventoryHub.Data;
 using InventoryHub.DTOs;
-using InventoryHub.Enums;
 using InventoryHub.Models;
 using InventoryHub.Repositories;
 using InventoryHub.Services.CloudinaryS;
-using Microsoft.AspNetCore.Http.HttpResults;
+using InventoryHub.Services.ImportsExports;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryHub.Services
@@ -19,14 +17,17 @@ namespace InventoryHub.Services
         private readonly IMapper _mapper;
         private readonly AppDbContext _context;
         private readonly CloudinaryService _cloudinaryService;
+        private readonly ProductExcelService _productExcelService;
 
-        public ProductServiceImpl(IProductRepository productRepository, ICategoryRepository categoryAccessBd, IMapper mapper, AppDbContext context, CloudinaryService cloudinaryService)
+        public ProductServiceImpl(IProductRepository productRepository, ICategoryRepository categoryAccessBd, 
+            IMapper mapper, AppDbContext context, CloudinaryService cloudinaryService, ProductExcelService productExcelService)
         {
             _productAccessBd = productRepository;
             _categoryAccessBd = categoryAccessBd;
             _mapper = mapper;
             _context = context;
             _cloudinaryService = cloudinaryService;
+            _productExcelService = productExcelService;
         }
 
         // Obtener todos los productos con categorías y LedDetails
@@ -144,15 +145,17 @@ namespace InventoryHub.Services
         {
             var filter = new LedStripFilter
             {
+                Search = dto.Search,
                 CompatibleTVModel = dto.CompatibleTVModel,
-                MinLedCount = dto.MinLedCount,
-                MaxLedCount = dto.MaxLedCount,
-                MinLengthMm = dto.MinLengthMm,
-                MaxLengthMm = dto.MaxLengthMm,
-                LedVolts = dto.LedVolts
+                Inch = dto.Inch,
+                StripCount = dto.StripCount,
+                LedVolts = dto.LedVolts,
+                LedCount = dto.LedCount,
+                BoardCode = dto.BoardCode
             };
 
             var entities = await _productAccessBd.SearchLedStripsAsync(filter);
+
             return _mapper.Map<List<ProductDTO>>(entities);
         }
 
@@ -264,105 +267,26 @@ namespace InventoryHub.Services
             };
         }
 
-
-
         public async Task<ImportResult> ImportProductsFullExcel(IFormFile file)
         {
-            var result = new ImportResult
-            {
-                Products = new List<ProductDTO>()
-            };
+            // Leer Excel
+            var importResult = await _productExcelService.ImportProductsFullExcel(file);
 
-            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            // Guardar productos en BD
+            var saveResult = await SaveImportedProductsAsync(importResult.Products);
 
-            using var stream = file.OpenReadStream();
-            using var reader = ExcelReaderFactory.CreateReader(stream);
-
-            var conf = new ExcelDataSetConfiguration
-            {
-                ConfigureDataTable = _ => new ExcelDataTableConfiguration { UseHeaderRow = true }
-            };
-
-            var dataSet = reader.AsDataSet(conf);
-            var table = dataSet.Tables[0];
-
-            // Mantener códigos para detectar duplicados dentro del mismo archivo
-            var existingCodes = new HashSet<string>();
-
-            foreach (System.Data.DataRow row in table.Rows)
-            {
-                string code = row["code"]?.ToString().Trim() ?? "";
-                if (string.IsNullOrEmpty(code) || existingCodes.Contains(code))
-                {
-                    result.Duplicates++;
-                    continue;
-                }
-                existingCodes.Add(code);
-
-                string categoryName = row["categoryName"]?.ToString().Trim() ?? "Sin categoría";
-
-                // Crear DTO
-                var productDto = new ProductDTO
-                {
-                    Id = 0, // se asignará al guardar en BD
-                    Code = code,
-                    Barcode = row["barcode"]?.ToString() ?? "",
-                    Name = row["name"]?.ToString() ?? "Sin nombre",
-                    Brand = row["brand"]?.ToString() ?? "Sin marca",
-                    Model = row["model"]?.ToString(),
-                    Price = decimal.TryParse(row["price"]?.ToString(), out var price) ? price : 0,
-                    Stock = int.TryParse(row["stock"]?.ToString(), out var stock) ? stock : 0,
-                    MinStock = int.TryParse(row["minStock"]?.ToString(), out var minStock) ? minStock : 0,
-                    Description = row["description"]?.ToString(),
-                    CategoryId = 0, // se asigna al guardar en BD
-                    CategoryName = categoryName,
-                    IsActive = true,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    Images = new List<ProductImageDTO>(), // se llenarán después
-                    LedDetails = null
-                };
-
-                // Crear LedDetails solo si hay datos
-                var inchStr = row["inch"]?.ToString();
-                if (!string.IsNullOrEmpty(inchStr))
-                {
-                    // Leer LedType desde Excel
-                    LedType ledTypeValue = LedType.Normal;
-                    var ledTypeStr = row["ledType"]?.ToString();
-                    if (!string.IsNullOrEmpty(ledTypeStr) && int.TryParse(ledTypeStr, out int ledTypeInt))
-                    {
-                        if (Enum.IsDefined(typeof(LedType), ledTypeInt))
-                            ledTypeValue = (LedType)ledTypeInt;
-                    }
-
-                    productDto.LedDetails = new LedStripDetailsDTO
-                    {
-                        Inch = int.TryParse(row["inch"]?.ToString(), out var inch) ? inch : 0,
-                        StripCount = int.TryParse(row["stripCount"]?.ToString(), out var stripCount) ? stripCount : 0,
-                        LengthMm = int.TryParse(row["lengthMm"]?.ToString(), out var lengthMm) ? lengthMm : null,
-                        LedCount = int.TryParse(row["ledCount"]?.ToString(), out var ledCount) ? ledCount : null,
-                        LedVolts = int.TryParse(row["ledVolts"]?.ToString(), out var ledVolts) ? ledVolts : null,
-                        BoardCode = row["boardCode"]?.ToString(),
-                        Distribution = row["distribution"]?.ToString(),
-                        LedType = ledTypeValue, // ✅ enum seguro
-                        Notes = row["notes"]?.ToString(),
-                        CompatibleTVModels = string.IsNullOrEmpty(row["compatibleTVModels"]?.ToString())
-                            ? new List<string>()
-                            : row["compatibleTVModels"]?.ToString()
-                                .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                .Select(x => x.Trim())
-                                .ToList()
-                    };
-                }
-
-                result.Products.Add(productDto);
-                result.Created++;
-            }
-
-            return result;
+            return saveResult;
         }
+        public async Task<ImportResult> ImportStockProductExcell(IFormFile file)
+        {
+            // Leer Excel
+            var importResult = await _productExcelService.ImportStockProductsExcel(file);
 
+            // Update productos en BD
+            //var saveResult = await SaveImportedProductsAsync(importResult.Products);
+
+            return importResult;
+        }
 
         public async Task<ImportResult> SaveImportedProductsAsync(List<ProductDTO> products)
         {

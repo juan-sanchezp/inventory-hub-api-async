@@ -82,45 +82,62 @@ namespace InventoryHub.Repositories
         public async Task<List<ProductEntity>> SearchLedStripsAsync(LedStripFilter filter)
         {
             var query = _context.Products
+                .AsNoTracking()
                 .Include(p => p.LedDetails)
                     .ThenInclude(ld => ld.CompatibleTVs)
                 .Include(p => p.Category)
-                .Where(p => p.Category.Name == "Tiras LED")
+                .Where(p => p.Category.Name == "Tiras LED" && p.LedDetails != null)
                 .AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(filter.CompatibleTVModel))
-                query = query.Where(p =>
-                    p.LedDetails != null &&
-                    p.LedDetails.CompatibleTVs.Any(tv =>
-                        tv.ModelCode.Contains(filter.CompatibleTVModel)));
-
-            if (filter.MinLedCount.HasValue)
-                query = query.Where(p =>
-                    p.LedDetails != null &&
-                    p.LedDetails.LedCount >= filter.MinLedCount.Value);
-
-            if (filter.MaxLedCount.HasValue)
-                query = query.Where(p =>
-                    p.LedDetails != null &&
-                    p.LedDetails.LedCount <= filter.MaxLedCount.Value);
-
-            if (filter.MinLengthMm.HasValue)
-                query = query.Where(p =>
-                    p.LedDetails != null &&
-                    p.LedDetails.LengthMm >= filter.MinLengthMm.Value);
-
-            if (filter.MaxLengthMm.HasValue)
-                query = query.Where(p =>
-                    p.LedDetails != null &&
-                    p.LedDetails.LengthMm <= filter.MaxLengthMm.Value);
-
-            // 🔹 Filtrado por LedVolts como int
-            if (!string.IsNullOrWhiteSpace(filter.LedVolts))
+            // 🔎 Búsqueda general
+            if (!string.IsNullOrWhiteSpace(filter.Search))
             {
-                int volts = int.Parse(filter.LedVolts.Trim());
+                var search = filter.Search.Trim();
+
                 query = query.Where(p =>
-                    p.LedDetails != null &&
-                    p.LedDetails.LedVolts == volts);
+                    p.Name.Contains(search) ||
+                    p.Code.Contains(search) ||
+                    p.Barcode.Contains(search) ||
+                    (p.Model != null && p.Model.Contains(search)));
+            }
+
+            // 🔎 Modelo de TV compatible
+            if (!string.IsNullOrWhiteSpace(filter.CompatibleTVModel))
+            {
+                var model = filter.CompatibleTVModel.Trim();
+
+                query = query.Where(p =>
+                    p.LedDetails!.CompatibleTVs.Any(tv =>
+                        tv.ModelCode.Contains(model)));
+            }
+
+            // 📏 Pulgadas
+            if (filter.Inch.HasValue)
+                query = query.Where(p =>
+                    p.LedDetails!.Inch == filter.Inch.Value);
+
+            // 🔢 Cantidad de tiras
+            if (filter.StripCount.HasValue)
+                query = query.Where(p =>
+                    p.LedDetails!.StripCount == filter.StripCount.Value);
+
+            // ⚡ Voltaje
+            if (filter.LedVolts.HasValue)
+                query = query.Where(p =>
+                    p.LedDetails!.LedVolts == filter.LedVolts.Value);
+
+            // 💡 Cantidad de LEDs
+            if (filter.LedCount.HasValue)
+                query = query.Where(p =>
+                    p.LedDetails!.LedCount == filter.LedCount.Value);
+
+            // 🔧 BoardCode
+            if (!string.IsNullOrWhiteSpace(filter.BoardCode))
+            {
+                var board = filter.BoardCode.Trim();
+
+                query = query.Where(p =>
+                    p.LedDetails!.BoardCode.Contains(board));
             }
 
             return await query.ToListAsync();

@@ -2,11 +2,20 @@
 {
     public class LedStripFilter
     {
+        // Búsqueda general dinámica
+        public string? Search { get; set; }
+        // Busca en Name, Code, Barcode, Model
+
         public string? CompatibleTVModel { get; set; }
-        public int? MinLedCount { get; set; }
-        public int? MaxLedCount { get; set; }
-        public int? MinLengthMm { get; set; }
-        public int? MaxLengthMm { get; set; }
-        public string? LedVolts { get; set; }
+
+        public int? Inch { get; set; }
+
+        public int? StripCount { get; set; }
+
+        public int? LedVolts { get; set; }
+
+        public int? LedCount { get; set; }
+
+        public string? BoardCode { get; set; }
     }
 }

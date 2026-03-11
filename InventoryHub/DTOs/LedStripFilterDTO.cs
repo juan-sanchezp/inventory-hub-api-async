@@ -1,12 +1,21 @@
 ﻿namespace InventoryHub.DTOs
 {
-    public class LedStripFilterDTO
-    {
-        public string? CompatibleTVModel { get; set; }  // Búsqueda por modelo de TV
-        public int? MinLedCount { get; set; }
-        public int? MaxLedCount { get; set; }
-        public int? MinLengthMm { get; set; }
-        public int? MaxLengthMm { get; set; }
-        public string? LedVolts { get; set; } // Ej: "6V", "3V"
+        public class LedStripFilterDTO
+        {
+            // Búsqueda general dinámica
+            public string? Search { get; set; }
+        // Busca en Código / Nombre, barcode
+
+        public string? CompatibleTVModel { get; set; }  //busqueda por modelo de tv 
+
+            public int? Inch { get; set; }
+
+            public int? StripCount { get; set; }
+
+            public int? LedVolts { get; set; }
+
+            public int? LedCount { get; set; }
+
+            public string? BoardCode { get; set; }
+      }
     }
-}

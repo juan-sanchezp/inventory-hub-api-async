@@ -22,5 +22,6 @@ namespace InventoryHub.Services
         Task<List<string>> ReplaceProductImages(int productId, IFormFile[] files);
         Task<bool> DeleteProductImage(int productId, string imageUrl);
         Task<ImportResult> ImportProductsFullExcel(IFormFile file);
+        Task<ImportResult> ImportStockProductExcell(IFormFile file);
     }
 }

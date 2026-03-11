@@ -3,7 +3,8 @@ using InventoryHub.Repositories;
 using InventoryHub.Services;
 
 using InventoryHub.Services.CloudinaryS;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using InventoryHub.Services.ImportsExports;
+
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -98,6 +99,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepositoryImpl>();
 builder.Services.AddAutoMapper(typeof(Program)); //AutoMapper
 builder.Services.AddScoped<IProductService, ProductServiceImpl>();
 builder.Services.AddScoped<CloudinaryService>();//cloudinary
+builder.Services.AddScoped<ProductExcelService>();//files
 
 builder.Services.Configure<FormOptions>(options =>
 {
