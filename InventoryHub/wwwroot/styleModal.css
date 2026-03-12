@@ -3,9 +3,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 18px;
+    padding: 18px 20px; /* arriba/abajo | izquierda/derecha */
     margin-top: 18px;
     border-top: 1px solid var(--border);
+    width: 100%;
 }
 
 .modal-panel {
@@ -50,4 +51,24 @@
         background: #fbd5dc;
         border-color: #f3aab6;
         color: #b83b55;
+    }
+
+
+.stock-action {
+    margin-top: 10px;
+}
+
+.btn-remove-stock {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 6px;
+    background: #ff6b6b;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+    .btn-remove-stock:hover {
+        background: #e55353;
     }

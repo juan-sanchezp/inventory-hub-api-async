@@ -1,0 +1,147 @@
+﻿/* Contenedor de edición */
+.edit-col {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 20px;
+    padding: 20px;
+    background-color: #f9f9fb;
+    border-left: 1px solid #e0e0e0;
+    border-radius: 8px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* Encabezado de edición */
+.edit-header {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.edit-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.edit-subtitle {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 2px;
+}
+
+/* Secciones del formulario */
+.edit-section {
+    margin-bottom: 20px;
+}
+
+.edit-section-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 10px;
+    border-bottom: 1px dashed #ccc;
+    padding-bottom: 5px;
+}
+
+/* Filas y campos */
+.edit-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.edit-field {
+    flex: 1;
+    min-width: 150px;
+    display: flex;
+    flex-direction: column;
+}
+
+    .edit-field.full-width {
+        flex: 100%;
+    }
+
+.edit-label {
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+    color: #444;
+}
+
+.edit-input,
+.edit-textarea {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+    .edit-input:focus,
+    .edit-textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 4px rgba(0,0,0,0.1);
+        outline: none;
+    }
+
+/* Botones dentro de la edición */
+.edit-col .btn-save,
+.edit-col .btn-cancel {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.edit-col .btn-save {
+    background-color: var(--accent);
+    color: #fff;
+}
+
+    .edit-col .btn-save:hover {
+        background-color: #2a7de1; /* Ajusta según tu color */
+    }
+
+.edit-col .btn-cancel {
+    background-color: #eee;
+    color: #333;
+}
+
+    .edit-col .btn-cancel:hover {
+        background-color: #ddd;
+    }
+
+/* Checkbox estilo */
+.checkbox-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+    .checkbox-field input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+    }
+
+/* Hint / small text */
+.edit-hint {
+    font-size: 0.75rem;
+    color: #888;
+    margin-top: 2px;
+}
+
+/* Scroll suave */
+.edit-col::-webkit-scrollbar {
+    width: 6px;
+}
+
+.edit-col::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.15);
+    border-radius: 3px;
+}

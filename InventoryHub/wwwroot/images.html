@@ -2,23 +2,32 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Subir imágenes de producto</title>
+    <title>Administrar imágenes de producto</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-100 p-10">
 
-    <h1 class="text-3xl font-bold mb-6">Subir imágenes de producto</h1>
+    <h1 class="text-3xl font-bold mb-6">Administrar imágenes de producto</h1>
 
-    <div class="bg-white p-6 rounded shadow w-96">
+    <div class="bg-white p-6 rounded shadow w-[500px]">
 
         <label class="block mb-2 font-semibold">Product ID</label>
-        <input id="productId"
-               type="number"
-               value="1"
-               class="border p-2 w-full mb-4 rounded">
+
+        <div class="flex gap-2 mb-4">
+            <input id="productId"
+                   type="number"
+                   value="1"
+                   class="border p-2 w-full rounded">
+
+            <button onclick="loadImages()"
+                    class="bg-gray-700 text-white px-4 rounded hover:bg-gray-800">
+                Ver imágenes
+            </button>
+        </div>
 
         <label class="block mb-2 font-semibold">Seleccionar imágenes</label>
+
         <input id="files"
                type="file"
                multiple
@@ -29,77 +38,189 @@
             Subir imágenes
         </button>
 
-        <div id="result" class="mt-4 text-sm"></div>
+        <div id="result" class="mt-4 text-sm text-gray-700"></div>
 
-        <div id="preview" class="mt-4 grid grid-cols-2 gap-2"></div>
+        <div id="preview" class="mt-6 grid grid-cols-3 gap-3"></div>
 
     </div>
 
     <script>
 
-        async function uploadImages() {
+
+        async function loadImages() {
 
             const productId = document.getElementById("productId").value;
-            const fileInput = document.getElementById("files");
-            const result = document.getElementById("result");
             const preview = document.getElementById("preview");
+            const result = document.getElementById("result");
 
-            result.innerHTML = "";
             preview.innerHTML = "";
+            result.innerHTML = "Cargando...";
 
-            if (!productId || fileInput.files.length === 0) {
-                result.innerHTML = "Selecciona un Product ID y al menos una imagen";
+            if (!productId) {
+                alert("Ingresa un Product ID");
                 return;
-            }
-
-            const formData = new FormData();
-
-            for (let file of fileInput.files) {
-                formData.append("files", file);
             }
 
             try {
 
-                const response = await fetch(`https://localhost:7266/api/products/${productId}/images`, {
-                    method: "POST",
-                    body: formData
-                });
+                const response = await fetch(`https://localhost:7266/api/products/${productId}`);
 
                 if (!response.ok) {
-                    const text = await response.text();
-                    throw new Error(text || "Error al subir imágenes");
+                    throw new Error("No se pudo obtener el producto");
                 }
 
-                const images = await response.json();
+                const json = await response.json();
 
-                result.innerHTML = `<b>Imágenes subidas:</b> (${images.length})`;
+                const images = json.data.images;
 
-                images.forEach(imgData => {
+                if (!images || images.length === 0) {
 
-                    const container = document.createElement("div");
-                    container.className = "relative";
+                    result.innerHTML = "Este producto no tiene imágenes";
 
-                    const img = document.createElement("img");
-                    img.src = imgData.url;
-                    img.className = "w-full h-32 object-cover rounded border";
+                    return;
 
-                    container.appendChild(img);
+                }
 
-                    if (imgData.isMain) {
-                        const badge = document.createElement("span");
-                        badge.innerText = "Principal";
-                        badge.className = "absolute top-1 left-1 bg-green-500 text-white text-xs px-2 py-1 rounded";
-                        container.appendChild(badge);
-                    }
+                result.innerHTML = `${images.length} imágenes encontradas`;
 
-                    preview.appendChild(container);
-
+                images.forEach(img => {
+                    renderImage(img);
                 });
 
             }
             catch (error) {
 
                 result.innerHTML = "Error: " + error.message;
+
+            }
+
+        }
+
+
+
+        function renderImage(imgData) {
+
+            const preview = document.getElementById("preview");
+
+            const container = document.createElement("div");
+            container.className = "relative";
+
+            const img = document.createElement("img");
+            img.src = imgData.url;
+            img.className = "w-full h-32 object-cover rounded border";
+
+            container.appendChild(img);
+
+            if (imgData.isMain) {
+
+                const badge = document.createElement("span");
+                badge.innerText = "Principal";
+
+                badge.className = "absolute top-1 left-1 bg-green-500 text-white text-xs px-2 py-1 rounded";
+
+                container.appendChild(badge);
+
+            }
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.innerText = "✕";
+
+            deleteBtn.className = "absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs";
+
+            deleteBtn.onclick = () => deleteImage(imgData.publicId, container);
+
+            container.appendChild(deleteBtn);
+
+            preview.appendChild(container);
+
+        }
+
+
+
+        async function uploadImages() {
+
+            const productId = document.getElementById("productId").value;
+            const fileInput = document.getElementById("files");
+            const result = document.getElementById("result");
+
+            if (!productId || fileInput.files.length === 0) {
+
+                result.innerHTML = "Selecciona un Product ID y al menos una imagen";
+
+                return;
+
+            }
+
+            const formData = new FormData();
+
+            for (let file of fileInput.files) {
+
+                formData.append("files", file);
+
+            }
+
+            try {
+
+                const response = await fetch(`https://localhost:7266/api/products/${productId}/images`, {
+
+                    method: "POST",
+                    body: formData
+
+                });
+
+                if (!response.ok) {
+
+                    throw new Error("Error al subir imágenes");
+
+                }
+
+                result.innerHTML = "Imágenes subidas correctamente";
+
+                loadImages();
+
+            }
+            catch (error) {
+
+                result.innerHTML = "Error: " + error.message;
+
+            }
+
+        }
+
+
+
+        async function deleteImage(publicId, container) {
+
+            const productId = document.getElementById("productId").value;
+
+            if (!confirm("¿Eliminar esta imagen?")) return;
+
+            try {
+
+                const response = await fetch(
+                    `https://localhost:7266/api/products/${productId}/images?publicId=${publicId}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    throw new Error(text || "No se pudo eliminar la imagen");
+                }
+
+                const json = await response.json();
+
+                if (json.success) {
+                    container.remove();
+                } else {
+                    throw new Error(json.message);
+                }
+
+            }
+            catch (error) {
+
+                alert("Error: " + error.message);
 
             }
 

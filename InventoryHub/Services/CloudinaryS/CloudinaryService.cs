@@ -23,14 +23,14 @@ namespace InventoryHub.Services.CloudinaryS
             _cloudinary = new Cloudinary(account);
         }
 
-        public async Task<CloudinaryUploadResult> UploadImage(IFormFile file)
+        public async Task<CloudinaryUploadResult> UploadImage(IFormFile file, string publidId)
         {
             await using var stream = file.OpenReadStream();
             var uploadParams = new ImageUploadParams
             {
                 File = new FileDescription(file.FileName, stream),
                 // Opcional: Puedes especificar un PublicId personalizado
-                // PublicId = $"product_{Guid.NewGuid()}"
+                PublicId = publidId
             };
 
             var result = await _cloudinary.UploadAsync(uploadParams);

@@ -7,6 +7,7 @@ using InventoryHub.Services.CloudinaryS;
 using InventoryHub.Services.ImportsExports;
 
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.Metrics;
 
 namespace InventoryHub.Services
 {
@@ -182,11 +183,15 @@ namespace InventoryHub.Services
                 throw new Exception("Producto no encontrado");
 
             var urls = new List<string>();
+            int counter = 1; // contador dentro del mismo lote
 
             foreach (var file in files)
             {
+                string datePart = DateTime.UtcNow.ToString("yyMMdds");
+                string publicId = $"{product.Code}_{datePart}_{counter}";
+
                 // Subir a Cloudinary
-                var result = await _cloudinaryService.UploadImage(file);
+                var result = await _cloudinaryService.UploadImage(file, publicId);
 
                 // Crear entidad imagen
                 var image = new ProductImageEntity
@@ -194,19 +199,53 @@ namespace InventoryHub.Services
                     Url = result.Url,
                     PublicId = result.PublicId,
                     ProductId = productId,
-                    IsMain = product.Images.Count == 0 // la primera será principal
+                    IsMain = !product.Images.Any() // la primera imagen principal
                 };
 
                 product.Images.Add(image);
                 urls.Add(result.Url);
+
+                counter++; // siguiente imagen en el lote
             }
 
             product.UpdatedAt = DateTime.UtcNow;
-
             await _productAccessBd.UpdateAsync(product);
 
             return urls;
         }
+        //public async Task<List<string>> UploadProductImages(int productId, IFormFile[] files)
+        //{
+        //    var product = await _productAccessBd.GetByIdAsync(productId);
+
+        //    if (product == null)
+        //        throw new Exception("Producto no encontrado");
+
+        //    var urls = new List<string>();
+
+        //    foreach (var file in files)
+        //    {
+        //        // Subir a Cloudinary
+        //        var result = await _cloudinaryService.UploadImage(file);
+
+        //        // Crear entidad imagen
+        //        var image = new ProductImageEntity
+        //        {
+        //            Url = result.Url,
+        //            PublicId = result.PublicId,
+        //            ProductId = productId,
+        //            IsMain = product.Images.Count == 0 // la primera será principal
+        //        };
+
+        //        product.Images.Add(image);
+        //        urls.Add(result.Url);
+        //    }
+
+        //    product.UpdatedAt = DateTime.UtcNow;
+
+        //    await _productAccessBd.UpdateAsync(product);
+
+        //    return urls;
+        //}
 
         public async Task<bool> DeleteProductImage(int productId, string publicId)
         {
@@ -251,8 +290,10 @@ namespace InventoryHub.Services
             // borrar imagen vieja
             await _cloudinaryService.DeleteImageAsync(oldPublicId);
 
+            string datePart = DateTime.UtcNow.ToString("yyMMdds");
+            string publicId = $"{product.Code}_{datePart}";
             // subir nueva
-            var uploadResult = await _cloudinaryService.UploadImage(newFile);
+            var uploadResult = await _cloudinaryService.UploadImage(newFile, publicId+"r");
 
             oldImage.Url = uploadResult.Url;
             oldImage.PublicId = uploadResult.PublicId;
@@ -382,6 +423,12 @@ namespace InventoryHub.Services
             product.Name = dto.Name;
             product.Brand = dto.Brand;
             product.Model = dto.Model;
+            product.Barcode = dto.Barcode;
+            product.Price = dto.Price;
+            product.Stock = dto.Stock;
+            product.MinStock = dto.MinStock;
+
+
             product.Description = dto.Description;
             product.IsActive = dto.IsActive;
 
