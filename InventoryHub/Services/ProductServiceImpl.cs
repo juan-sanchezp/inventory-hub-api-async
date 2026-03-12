@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using InventoryHub.Data;
 using InventoryHub.DTOs;
+using InventoryHub.Enums;
 using InventoryHub.Models;
 using InventoryHub.Repositories;
 using InventoryHub.Services.CloudinaryS;
@@ -152,6 +153,7 @@ namespace InventoryHub.Services
                 StripCount = dto.StripCount,
                 LedVolts = dto.LedVolts,
                 LedCount = dto.LedCount,
+                LedType = dto.LedType,
                 BoardCode = dto.BoardCode
             };
 
@@ -439,6 +441,7 @@ namespace InventoryHub.Services
                 product.LedDetails.LengthMm = dto.LedDetails.LengthMm;
                 product.LedDetails.LedCount = dto.LedDetails.LedCount;
                 product.LedDetails.LedVolts = dto.LedDetails.LedVolts;
+                product.LedDetails.LedType = (LedType) dto.LedDetails.LedType;
                 product.LedDetails.BoardCode = dto.LedDetails.BoardCode;
                 product.LedDetails.Distribution = dto.LedDetails.Distribution;
                 product.LedDetails.Notes = dto.LedDetails.Notes;

@@ -1,5 +1,6 @@
 ﻿using InventoryHub.Data;
 using InventoryHub.DTOs;
+using InventoryHub.Enums;
 using InventoryHub.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -130,6 +131,14 @@ namespace InventoryHub.Repositories
             if (filter.LedCount.HasValue)
                 query = query.Where(p =>
                     p.LedDetails!.LedCount == filter.LedCount.Value);
+
+            if (filter.LedType.HasValue)
+            {
+                var ledType = (LedType)filter.LedType.Value;
+
+                query = query.Where(p =>
+                    p.LedDetails!.LedType == ledType);
+            }
 
             // 🔧 BoardCode
             if (!string.IsNullOrWhiteSpace(filter.BoardCode))

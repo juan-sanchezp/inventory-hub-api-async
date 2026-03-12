@@ -36,6 +36,7 @@
         public int LedCount { get; set; }
 
         public int LedVolts { get; set; }
+        public int LedType { get; set; }
 
         public string BoardCode { get; set; }
 
