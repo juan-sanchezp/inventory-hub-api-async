@@ -67,7 +67,7 @@ namespace InventoryHub.DTOs
 
         [StringLength(20)]
          
-        public string BoardCode { get; set; }
+        public string? BoardCode { get; set; }
         public string? Distribution { get; set; }
         public LedType LedType { get; set; }
 
