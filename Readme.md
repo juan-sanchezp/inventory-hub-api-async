@@ -11,12 +11,12 @@ Su objetivo es demostrar el uso correcto de **.NET 8**, patrones de diseño, sep
 
 ### 🔹 Detalle de producto
 <p align="center">
-  <img src="URL_IMAGEN" width="700"/>
+  <img alt="image" src="https://github.com/user-attachments/assets/0aaef66b-2d0b-4b00-be41-f77caf7945fa" width="700"/>
 </p>
 
 ### 🔹 Edición de Producto
 <p align="center">
-  <img src="URL_IMAGEN" width="700"/>
+ <img width="700" alt="image" src="https://github.com/user-attachments/assets/c325f7be-13f1-4363-a998-5f10a82b5a3f" />
 </p>
 ---
 
