@@ -1,4 +1,4 @@
-<img width="1618" height="891" alt="image" src="https://github.com/user-attachments/assets/e45a9715-8731-45f7-b67b-069d17aa73e0" />#  API REST – Inventario de Productos (InventoryHub)
+ API REST – Inventario de Productos (InventoryHub)
 
 API REST desarrollada con **.NET 8** para la gestión de productos en un inventario, aplicando una arquitectura por capas y buenas prácticas de desarrollo backend.  
 El proyecto está pensado para **uso real en un negocio de ventas**, permitiendo crear, consultar, actualizar y eliminar productos de forma segura y escalable.
@@ -6,10 +6,18 @@ El proyecto está pensado para **uso real en un negocio de ventas**, permitiendo
 Su objetivo es demostrar el uso correcto de **.NET 8**, patrones de diseño, separación de responsabilidades y buenas prácticas en el desarrollo de APIs.
 
 
-## Vista del sistema
-![images](https://github.com/user-attachments/assets/6ab65658-727a-4f55-a207-f34c0e408d9b)
-![450_1000](https://github.com/user-attachments/assets/9d13df1f-7c78-470a-9b01-214b42ef6c6f)
 
+## 📸 Vista del sistema
+
+### 🔹 Detalle de producto
+<p align="center">
+  <img src="URL_IMAGEN" width="700"/>
+</p>
+
+### 🔹 Edición de Producto
+<p align="center">
+  <img src="URL_IMAGEN" width="700"/>
+</p>
 ---
 
 
