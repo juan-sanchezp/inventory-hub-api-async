@@ -337,12 +337,12 @@ body {
 }
 
 .f-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text2);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    font-family: 'Space Mono',monospace;
+    font-size: 14px; /* ya lo tienes, está bien */
+    font-weight: 600; /* reduce un poco el peso */
+    color: #b91c1c;
+    letter-spacing: 0.03em; /* menos espaciado, más natural */
+    text-transform: none; /* quita las mayúsculas */
+    font-family: 'Outfit', sans-serif; /* más legible que Space Mono */
 }
 
 .f-input, .f-select {
@@ -359,13 +359,16 @@ body {
 }
 
     .f-input::placeholder {
-        color: var(--muted);
+        color: #d0d4e0;
+        font-style: italic;
+        font-size: 12px;
     }
 
     .f-input:focus, .f-select:focus {
         border-color: var(--accent);
         box-shadow: 0 0 0 3px var(--accent-dim);
         background: #fff;
+        color: red;
     }
 
 .w-lg {

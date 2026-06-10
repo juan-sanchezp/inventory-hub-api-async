@@ -80,6 +80,13 @@
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+
+    .edit-input::placeholder,
+    .edit-textarea::placeholder {
+        color: #f8c0bb;
+    }
+
+
     .edit-input:focus,
     .edit-textarea:focus {
         border-color: var(--accent);

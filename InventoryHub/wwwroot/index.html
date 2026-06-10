@@ -66,7 +66,7 @@
                             <option value="">Todos</option>
                             <option value="0">Normal</option>
                             <option value="1">Cuadrado</option>
-                            <option value="2">Sin lente</option>
+                            <option value="2">Grano de Arroz</option>
                             <option value="3">Mediano</option>
                             <option value="4">Ojo de vaca</option>
                         </select>
@@ -209,7 +209,7 @@
                                     <select id="edit-ledType" class="edit-input">
                                         <option value="0">Normal</option>
                                         <option value="1">Cuadrado</option>
-                                        <option value="2">Sin lente</option>
+                                        <option value="2">Grano de Arroz</option>
                                         <option value="3">Mediano</option>
                                         <option value="4">Ojo de vaca</option>
                                     </select>
@@ -307,7 +307,7 @@
                                     <select id="register-ledType" class="edit-input">
                                         <option value="0">Normal</option>
                                         <option value="1">Cuadrado</option>
-                                        <option value="2">Sin lente</option>
+                                        <option value="2">Grano de arroz</option>
                                         <option value="3">Mediano</option>
                                         <option value="4">Ojo de vaca</option>
                                     </select>
@@ -617,7 +617,7 @@
                         ledCount:     parseInt(document.getElementById('edit-ledCount').value)     || null,
                         ledVolts:     (ledVoltsRaw >= 3 && ledVoltsRaw <= 6) ? ledVoltsRaw : null,
                         // ✅ CORREGIDO: incluido en el payload; validado contra valores permitidos
-                        ledType:      [0, 1, 2].includes(ledTypeRaw) ? ledTypeRaw : 0,
+                        ledType:      [0, 1, 2, 3, 4].includes(ledTypeRaw) ? ledTypeRaw : 0,
                         boardCode:    document.getElementById('edit-boardCode').value.trim()       || null,
                         distribution: document.getElementById('edit-distribution').value.trim()    || null,
                         notes:        document.getElementById('edit-notes').value.trim()           || null,
@@ -742,7 +742,7 @@
                 const boardCode     = document.getElementById('register-boardCode').value.trim()      || null;
                 const distribution  = document.getElementById('register-distribution').value.trim()   || null;
                 const ledTypeRaw    = parseInt(document.getElementById('register-ledType').value);
-                const ledType       = [0, 1, 2].includes(ledTypeRaw) ? ledTypeRaw : 0;
+                const ledType       = [0, 1, 2, 3, 4].includes(ledTypeRaw) ? ledTypeRaw : 0;
                 const notes         = document.getElementById('register-notes').value.trim()          || null;
                 const compatibleTVModels = document.getElementById('register-models').value
                     .split(',').map(s => s.trim()).filter(s => s.length > 0);

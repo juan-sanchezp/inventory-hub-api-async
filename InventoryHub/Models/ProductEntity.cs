@@ -4,6 +4,7 @@
 namespace InventoryHub.Models
 {
     // 🔹 Categoría de productos
+
     public class CategoryEntity
     {
         public int Id { get; set; }
