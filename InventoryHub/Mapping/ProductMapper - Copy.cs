@@ -1,4 +1,4 @@
-﻿using InventoryHub.DTOs;
+﻿using InventoryHub.DTOs.Product;
 using InventoryHub.Models;
 
 namespace InventoryHub.Mapping

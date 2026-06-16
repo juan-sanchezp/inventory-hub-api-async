@@ -1,4 +1,4 @@
-﻿namespace InventoryHub.DTOs
+﻿namespace InventoryHub.DTOs.Product
 {
     public class ImportResult
     {

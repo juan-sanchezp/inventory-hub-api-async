@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using InventoryHub.DTOs;
+using InventoryHub.DTOs.Product;
 using InventoryHub.Models;
 using System.Linq;
 

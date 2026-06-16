@@ -2,7 +2,8 @@
     using ExcelDataReader;
     using global::InventoryHub.DTOs;
     using global::InventoryHub.Enums;
-    using Microsoft.AspNetCore.Http;
+using InventoryHub.DTOs.Product;
+using Microsoft.AspNetCore.Http;
     using OfficeOpenXml;
     using System.Data;
 

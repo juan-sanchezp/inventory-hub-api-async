@@ -94,10 +94,15 @@ builder.Services.AddSwaggerGen(options =>
 //Repositories
 builder.Services.AddScoped<ICategoryRepository, CategoryRepositoryImpl>();
 builder.Services.AddScoped<IProductRepository, ProductRepositoryImpl>();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepositoryImpl>();
+builder.Services.AddScoped<ISaleRepository, SaleRepositoryImpl>();
+
 
 //Servicios
 builder.Services.AddAutoMapper(typeof(Program)); //AutoMapper
 builder.Services.AddScoped<IProductService, ProductServiceImpl>();
+builder.Services.AddScoped<ICustomerService, CustomerServiceImpl>();
+builder.Services.AddScoped<ISaleService, SaleServiceImpl>();
 builder.Services.AddScoped<CloudinaryService>();//cloudinary
 builder.Services.AddScoped<ProductExcelService>();//files
 

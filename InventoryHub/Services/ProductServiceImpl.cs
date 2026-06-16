@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using InventoryHub.Data;
-using InventoryHub.DTOs;
+using InventoryHub.DTOs.Product;
 using InventoryHub.Enums;
 using InventoryHub.Models;
 using InventoryHub.Repositories;

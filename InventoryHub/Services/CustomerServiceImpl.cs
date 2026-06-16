@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using InventoryHub.DTOs;
+using InventoryHub.Models;
 using InventoryHub.Repositories;
 
 
@@ -60,7 +61,7 @@ namespace InventoryHub.Services
 
             _mapper.Map(customerDTO, customerEntity);
 
-            customerEntity.UpdatedAt = DateTime.UtcNow;
+            customerEntity.CreatedAt = DateTime.UtcNow;
 
             var updatedEntity = await _customerRepository.UpdateAsync(customerEntity);
 

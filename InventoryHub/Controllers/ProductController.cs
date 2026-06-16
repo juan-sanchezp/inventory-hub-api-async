@@ -1,4 +1,4 @@
-﻿using InventoryHub.DTOs;
+﻿using InventoryHub.DTOs.Product;
 using InventoryHub.Responses;
 using InventoryHub.Services;
 using InventoryHub.Services.ImportsExports;

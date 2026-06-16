@@ -2,7 +2,7 @@
 
 namespace InventoryHub.Models
 {
-    public class Customer
+    public class CustomerEntity
     {
         public int Id { get; set; }
 

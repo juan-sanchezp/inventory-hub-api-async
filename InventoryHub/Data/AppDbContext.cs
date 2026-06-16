@@ -15,6 +15,9 @@ namespace InventoryHub.Data
         // definition of tables
         public DbSet<ProductEntity> Products { get; set; }
         public DbSet<CategoryEntity> Categories { get; set; }
+        public DbSet<CustomerEntity> Customers { get; set; }
+        public DbSet<SaleEntity> Sales { get; set; }
+        public DbSet<SaleDetailEntity> SaleDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

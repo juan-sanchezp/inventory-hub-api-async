@@ -2,7 +2,7 @@
 using InventoryHub.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace InventoryHub.DTOs
+namespace InventoryHub.DTOs.Product
 {
     public class ProductDTO
     {

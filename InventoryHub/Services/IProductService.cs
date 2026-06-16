@@ -1,5 +1,4 @@
-﻿
-using InventoryHub.DTOs;
+﻿using InventoryHub.DTOs.Product;
 using System.Threading.Tasks;
 
 namespace InventoryHub.Services

@@ -27,6 +27,7 @@ namespace InventoryHub.Models
         public string Brand { get; set; } = null!;
         public string? Model { get; set; }
         public decimal Price { get; set; }
+        public decimal? TaxRate { get; set; }
         public int Stock { get; set; }
         public int MinStock { get; set; }
         // Activo o descontinuado
