@@ -2,3 +2,4 @@
 bin/
 obj/
 InventoryHub/appsettings.json
+InventoryHub/wwwroot/
