@@ -1,5 +1,6 @@
 ﻿namespace InventoryHub.Exceptions
 {
+    using InventoryHub.Responses;
     using Microsoft.AspNetCore.Diagnostics;
     using Microsoft.AspNetCore.Mvc;
 
@@ -10,11 +11,10 @@
         public IActionResult HandleError()
         {
             var exception = HttpContext.Features.Get<IExceptionHandlerFeature>();
+            var message = exception?.Error.Message ?? "Unexpected error";
 
-            return Problem(
-                title: "Unexpected error",
-                detail: exception?.Error.Message
-            );
+            var response = ResponseFactory.Fail<object>(message);
+            return StatusCode(500, response);
         }
     }
 }

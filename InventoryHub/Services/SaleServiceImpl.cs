@@ -22,9 +22,9 @@ namespace InventoryHub.Services
 
         // ==================== BASIC CRUD ====================
 
-        public async Task<List<SaleResponseDTO>> GetAll()
+        public async Task<List<SaleResponseDTO>> GetAll(SaleFilterDTO? filter = null)
         {
-            var salesEntity = await _saleRepository.GetAllAsync();
+            var salesEntity = await _saleRepository.GetAllAsync(filter);
             return _mapper.Map<List<SaleResponseDTO>>(salesEntity);
         }
 
@@ -229,10 +229,10 @@ namespace InventoryHub.Services
             sale.Status = SaleStatus.Completed;
             sale.CustomerId = request.CustomerId;
             sale.DocumentType = request.DocumentType;
+            sale.PaymentMethod = request.PaymentMethod;
 
             if (request.DocumentType == SaleDocumentType.Electronic)
             {
-                sale.PaymentMethod = request.PaymentMethod;
                 sale.DueDate = request.DueDate;
                 sale.DianStatus = "Pendiente";
             }

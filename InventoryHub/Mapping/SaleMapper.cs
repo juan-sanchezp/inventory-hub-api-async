@@ -80,6 +80,8 @@ namespace InventoryHub.Mapping
 
             // Entity -> Response DTO
             CreateMap<SaleDetailEntity, SaleDetailResponseDTO>()
+                .ForMember(dest => dest.ProductCode,
+                    opt => opt.MapFrom(src => src.Product != null ? src.Product.Code : null))
                 .ForMember(dest => dest.ProductName,
                     opt => opt.MapFrom(src => src.Product != null ? src.Product.Name : string.Empty));
 

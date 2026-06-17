@@ -22,9 +22,20 @@ namespace InventoryHub.Controllers
         // ==================== BASIC CRUD ====================
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(
+            [FromQuery] string? productCode,
+            [FromQuery] string? customerName,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate)
         {
-            var sales = await _saleService.GetAll();
+            var filter = new SaleFilterDTO
+            {
+                ProductCode = productCode,
+                CustomerName = customerName,
+                StartDate = startDate,
+                EndDate = endDate
+            };
+            var sales = await _saleService.GetAll(filter);
             return Ok(ResponseFactory.Success(sales, "Sales retrieved successfully"));
         }
 

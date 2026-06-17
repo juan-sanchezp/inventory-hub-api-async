@@ -13,5 +13,7 @@ namespace InventoryHub.Repositories
         Task<CustomerEntity> UpdateAsync(CustomerEntity customerEntity);
 
         Task<bool> DeleteAsync(CustomerEntity customerEntity);
+
+        Task<bool> HasSalesAsync(int customerId);
     }
 }

@@ -1,11 +1,12 @@
-﻿using InventoryHub.Models;
+﻿using InventoryHub.DTOs.Sale;
+using InventoryHub.Models;
 
 namespace InventoryHub.Repositories
 {
     public interface ISaleRepository
     {
         // Basic CRUD
-        Task<List<SaleEntity>> GetAllAsync();
+        Task<List<SaleEntity>> GetAllAsync(SaleFilterDTO? filter = null);
         Task<SaleEntity?> GetByIdAsync(int id);
         Task<SaleEntity?> AddAsync(SaleEntity saleEntity);
         Task<SaleEntity> UpdateAsync(SaleEntity saleEntity);

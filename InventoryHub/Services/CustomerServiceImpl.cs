@@ -76,6 +76,11 @@ namespace InventoryHub.Services
             if (customerEntity == null)
                 return null;
 
+            var hasSales = await _customerRepository.HasSalesAsync(id);
+            if (hasSales)
+                throw new InvalidOperationException(
+                    "No se puede eliminar el cliente porque tiene ventas asociadas");
+
             bool deleted = await _customerRepository.DeleteAsync(customerEntity);
 
             if (!deleted)

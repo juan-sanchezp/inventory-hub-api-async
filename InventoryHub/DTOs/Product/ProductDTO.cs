@@ -37,6 +37,7 @@ namespace InventoryHub.DTOs.Product
 
         [Range(0, 10000)]
         public int MinStock { get; set; }
+        public int CantOrderStock { get; set; }
         public bool IsActive { get; set; } = true;
 
         [StringLength(500)]

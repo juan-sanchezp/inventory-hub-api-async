@@ -10,7 +10,7 @@ namespace InventoryHub.Models
         public int? CustomerId { get; set; }
         public virtual CustomerEntity? Customer { get; set; }
 
-        public DateTime SaleDate { get; set; }
+        public DateTime SaleDate { get; set; } = DateTime.UtcNow;
         public SaleDocumentType DocumentType { get; set; }  // Pos = 1, Electronic = 2
         public SaleStatus Status { get; set; }  // Pending = 1, Completed = 2, Cancelled = 3
 

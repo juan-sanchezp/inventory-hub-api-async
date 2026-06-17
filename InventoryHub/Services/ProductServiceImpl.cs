@@ -429,7 +429,7 @@ namespace InventoryHub.Services
             product.Price = dto.Price;
             product.Stock = dto.Stock;
             product.MinStock = dto.MinStock;
-
+            product.CantOrderStock = dto.CantOrderStock;
 
             product.Description = dto.Description;
             product.IsActive = dto.IsActive;

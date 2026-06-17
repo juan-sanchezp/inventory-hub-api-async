@@ -15,6 +15,8 @@
 
         public int MinStock { get; set; }
 
+        public int CantOrderStock { get; set; }
+
      
 
 

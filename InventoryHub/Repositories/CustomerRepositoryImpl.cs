@@ -15,7 +15,6 @@ namespace InventoryHub.Repositories
 
         public async Task<CustomerEntity?> AddAsync(CustomerEntity customerEntity)
         {
-            // Validación de cliente duplicado por documento
             var existing = await _context.Customers
                 .FirstOrDefaultAsync(c => c.DocumentNumber == customerEntity.DocumentNumber);
 
@@ -48,6 +47,11 @@ namespace InventoryHub.Repositories
         {
             return await _context.Customers
                 .FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<bool> HasSalesAsync(int customerId)
+        {
+            return await _context.Sales.AnyAsync(s => s.CustomerId == customerId);
         }
 
         public async Task<CustomerEntity> UpdateAsync(CustomerEntity customerEntity)

@@ -5,7 +5,7 @@ namespace InventoryHub.Services
     public interface ISaleService
     {
         // Basic CRUD operations
-        Task<List<SaleResponseDTO>> GetAll();
+        Task<List<SaleResponseDTO>> GetAll(SaleFilterDTO? filter = null);
         Task<SaleResponseDTO?> GetById(int id);
         Task<SaleResponseDTO?> Save(CreateSaleRequestDTO saleDTO);
         Task<SaleResponseDTO?> Update(int id, UpdateSaleRequestDTO saleDTO);

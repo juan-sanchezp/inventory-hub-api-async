@@ -1,4 +1,5 @@
 ﻿using InventoryHub.Data;
+using InventoryHub.DTOs.Sale;
 using InventoryHub.Enums;
 using InventoryHub.Models;
 using Microsoft.EntityFrameworkCore;
@@ -30,11 +31,30 @@ namespace InventoryHub.Repositories
             return result > 0;
         }
 
-        public async Task<List<SaleEntity>> GetAllAsync()
+        public async Task<List<SaleEntity>> GetAllAsync(SaleFilterDTO? filter = null)
         {
-            return await _context.Sales
+            var query = _context.Sales
                 .Include(s => s.Customer)
                 .Include(s => s.Details)
+                    .ThenInclude(d => d.Product)
+                .AsQueryable();
+
+            if (filter != null)
+            {
+                if (!string.IsNullOrWhiteSpace(filter.ProductCode))
+                    query = query.Where(s => s.Details.Any(d => d.Product != null && d.Product.Code.Contains(filter.ProductCode)));
+
+                if (!string.IsNullOrWhiteSpace(filter.CustomerName))
+                    query = query.Where(s => s.Customer != null && s.Customer.Name.Contains(filter.CustomerName));
+
+                if (filter.StartDate.HasValue)
+                    query = query.Where(s => s.SaleDate >= filter.StartDate.Value);
+
+                if (filter.EndDate.HasValue)
+                    query = query.Where(s => s.SaleDate <= filter.EndDate.Value.AddDays(1));
+            }
+
+            return await query
                 .OrderByDescending(s => s.SaleDate)
                 .ToListAsync();
         }
