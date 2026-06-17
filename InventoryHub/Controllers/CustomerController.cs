@@ -1,5 +1,4 @@
-﻿using InventoryHub.DTOs;
-
+﻿using InventoryHub.DTOs.Customer;
 using InventoryHub.Responses;
 using InventoryHub.Services;
 using Microsoft.AspNetCore.Http;

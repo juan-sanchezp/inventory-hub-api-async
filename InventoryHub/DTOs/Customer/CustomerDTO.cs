@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace InventoryHub.DTOs
+namespace InventoryHub.DTOs.Customer
 {
     public class CustomerDTO
     {

@@ -1,7 +1,7 @@
 ﻿// CreateSaleRequestDTO.cs
 using InventoryHub.Enums;
 
-namespace InventoryHub.DTOs
+namespace InventoryHub.DTOs.Sale
 {
     public class CreateSaleRequestDTO
     {
@@ -11,7 +11,7 @@ namespace InventoryHub.DTOs
 }
 
 // UpdateSaleRequestDTO.cs
-namespace InventoryHub.DTOs
+namespace InventoryHub.DTOs.Sale
 {
     public class UpdateSaleRequestDTO
     {
@@ -27,7 +27,7 @@ namespace InventoryHub.DTOs
 }
 
 // AddToCartRequestDTO.cs
-namespace InventoryHub.DTOs
+namespace InventoryHub.DTOs.Sale
 {
     public class AddToCartRequestDTO
     {
@@ -37,7 +37,7 @@ namespace InventoryHub.DTOs
 }
 
 // UpdateCartItemRequestDTO.cs
-namespace InventoryHub.DTOs
+namespace InventoryHub.DTOs.Sale
 {
     public class UpdateCartItemRequestDTO
     {
@@ -46,7 +46,7 @@ namespace InventoryHub.DTOs
 }
 
 // CheckoutRequestDTO.cs
-namespace InventoryHub.DTOs
+namespace InventoryHub.DTOs.Sale
 {
     public class CheckoutRequestDTO
     {
@@ -58,7 +58,7 @@ namespace InventoryHub.DTOs
 }
 
 // SaleResponseDTO.cs
-namespace InventoryHub.DTOs
+namespace InventoryHub.DTOs.Sale
 {
     public class SaleResponseDTO
     {
@@ -82,7 +82,7 @@ namespace InventoryHub.DTOs
 }
 
 // SaleDetailResponseDTO.cs
-namespace InventoryHub.DTOs
+namespace InventoryHub.DTOs.Sale
 {
     public class SaleDetailResponseDTO
     {

@@ -30,6 +30,7 @@ namespace InventoryHub.Models
         public decimal? TaxRate { get; set; }
         public int Stock { get; set; }
         public int MinStock { get; set; }
+        public int CantOrderStock { get; set; }
         // Activo o descontinuado
         public bool IsActive { get; set; } = true;
         public string? Description { get; set; }

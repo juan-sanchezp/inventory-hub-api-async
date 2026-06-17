@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using InventoryHub.DTOs;
+using InventoryHub.DTOs.Sale;
 using InventoryHub.Enums;
 using InventoryHub.Models;
 using InventoryHub.Repositories;

@@ -1,7 +1,10 @@
-﻿using InventoryHub.DTOs;
+﻿using CloudinaryDotNet;
+using InventoryHub.DTOs.Sale;
 using InventoryHub.Responses;
 using InventoryHub.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
+using System.Runtime.ConstrainedExecution;
 
 namespace InventoryHub.Controllers
 {
@@ -183,3 +186,26 @@ namespace InventoryHub.Controllers
         }
     }
 }
+
+
+
+//🔴 ESENCIALES:
+//POST / api / Sale / cart / add          ← Agregar productos
+//   POST   /api/Sale/{id}/ checkout     ← Finalizar venta
+//   GET    /api/Sale                   ← Ver historial
+
+//🟡 ÚTILES:
+//   GET / api / Sale / cart              ← Ver carrito
+//   GET    /api/Sale/{id}              ← Ver venta específica
+//   GET    /api/Sale/{id}/ details      ← Ver productos de una venta
+
+//🟢 OCASIONALES:
+//   PUT / api / Sale / cart / item /{ id}    ← Cambiar cantidad
+//   DELETE /api/Sale/cart/item/{id}    ← Quitar producto
+//   DELETE /api/Sale/cart/clear        ← Vaciar carrito
+
+//🔵 ADMINISTRATIVOS:
+//   POST / api / Sale                   ← Crear venta directa
+//   PUT    /api/Sale/{id}              ← Actualizar venta
+//   DELETE /api/Sale/{id}              ← Eliminar venta
+//   POST   /api/Sale/{id}/ send - to - dian ← Enviar a DIAN

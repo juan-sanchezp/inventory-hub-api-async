@@ -1,4 +1,4 @@
-﻿using InventoryHub.DTOs;
+﻿using InventoryHub.DTOs.Sale;
 
 namespace InventoryHub.Services
 {

@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using InventoryHub.DTOs;
+using InventoryHub.DTOs.Customer;
 using InventoryHub.Models;
 
 namespace InventoryHub.Mapping
