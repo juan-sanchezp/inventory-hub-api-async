@@ -80,26 +80,7 @@ namespace InventoryHub.Services
         public async Task<SaleResponseDTO?> GetCart()
         {
             var cartEntity = await _saleRepository.GetCartAsync();
-            if (cartEntity == null)
-            {
-                // Crear un nuevo carrito si no existe
-                var newCart = new SaleEntity
-                {
-                    SaleDate = DateTime.UtcNow,
-                    Status = SaleStatus.Draft,
-                    DocumentType = SaleDocumentType.Pos,
-                    SubTotal = 0,
-                    Tax = 0,
-                    Discount = 0,
-                    Total = 0,
-                    Details = new List<SaleDetailEntity>()
-                };
-
-                var savedCart = await _saleRepository.AddAsync(newCart);
-                return _mapper.Map<SaleResponseDTO>(savedCart);
-            }
-
-            return _mapper.Map<SaleResponseDTO>(cartEntity);
+            return cartEntity == null ? null : _mapper.Map<SaleResponseDTO>(cartEntity);
         }
 
         public async Task<SaleResponseDTO?> AddToCart(AddToCartRequestDTO request)

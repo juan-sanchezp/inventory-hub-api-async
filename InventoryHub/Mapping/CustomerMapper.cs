@@ -8,8 +8,10 @@ namespace InventoryHub.Mapping
     {
         public CustomerMapper()
         {
-            CreateMap<CustomerEntity, CustomerDTO>()
-                .ReverseMap();
+            CreateMap<CustomerEntity, CustomerDTO>();
+            CreateMap<CustomerDTO, CustomerEntity>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
         }
     }
 }

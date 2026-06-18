@@ -42,6 +42,7 @@ namespace InventoryHub.Services
         public async Task<CustomerDTO?> Save(CustomerDTO customerDTO)
         {
             var customerEntity = _mapper.Map<CustomerEntity>(customerDTO);
+            customerEntity.CreatedAt = DateTime.UtcNow;
 
             var savedEntity = await _customerRepository.AddAsync(customerEntity);
 
@@ -60,8 +61,6 @@ namespace InventoryHub.Services
                 return null;
 
             _mapper.Map(customerDTO, customerEntity);
-
-            customerEntity.CreatedAt = DateTime.UtcNow;
 
             var updatedEntity = await _customerRepository.UpdateAsync(customerEntity);
 

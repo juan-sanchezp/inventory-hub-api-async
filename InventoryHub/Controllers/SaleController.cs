@@ -95,6 +95,8 @@ namespace InventoryHub.Controllers
         public async Task<IActionResult> GetCart()
         {
             var cart = await _saleService.GetCart();
+            if (cart == null)
+                return Ok(ResponseFactory.Success<SaleResponseDTO?>(null, "No active cart"));
             return Ok(ResponseFactory.Success(cart, "Cart retrieved successfully"));
         }
 

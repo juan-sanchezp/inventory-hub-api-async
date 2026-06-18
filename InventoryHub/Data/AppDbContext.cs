@@ -33,13 +33,15 @@ namespace InventoryHub.Data
                     if (property.ClrType == typeof(DateTime))
                     {
                         property.SetValueConverter(new ValueConverter<DateTime, DateTime>(
-                            v => v,
+                            v => v.Kind == DateTimeKind.Local ? v.ToUniversalTime() : v,
                             v => DateTime.SpecifyKind(v, DateTimeKind.Utc)));
                     }
                     else if (property.ClrType == typeof(DateTime?))
                     {
                         property.SetValueConverter(new ValueConverter<DateTime?, DateTime?>(
-                            v => v,
+                            v => v.HasValue && v.Value.Kind == DateTimeKind.Local
+                                ? v.Value.ToUniversalTime()
+                                : v,
                             v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v));
                     }
                 }
