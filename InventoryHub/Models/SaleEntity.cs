@@ -12,7 +12,10 @@ namespace InventoryHub.Models
 
         public DateTime SaleDate { get; set; } = DateTime.UtcNow;
         public SaleDocumentType DocumentType { get; set; }  // Pos = 1, Electronic = 2
-        public SaleStatus Status { get; set; }  // Pending = 1, Completed = 2, Cancelled = 3
+        public SaleStatus Status { get; set; }  // Draft = 1, Confirmed = 2, Completed = 3, Cancelled = 4
+
+        // ========== ESTADO DE PAGO ==========
+        public PaymentStatus PaymentStatus { get; set; }  // Pending = 1, Partial = 2, Paid = 3, Overdue = 4, Cancelled = 5
 
         // Totales (calculados desde los detalles)
         public decimal SubTotal { get; set; }
@@ -21,26 +24,26 @@ namespace InventoryHub.Models
         public decimal Total { get; set; }
 
         // ========== CAMPOS EXCLUSIVOS PARA FACTURACIÓN ELECTRÓNICA ==========
-        // (Estos campos serán NULL para facturas POS)
 
         // Numeración y control DIAN
-        public string? ConsecutiveNumber { get; set; }      // Número de factura según resolución DIAN
-        public string? CUFE { get; set; }                   // Código único de facturación electrónica
-        public string? DianStatus { get; set; }             // Pendiente, Enviado, Aprobado, Rechazado
-        public DateTime? DianSentDate { get; set; }         // Fecha de envío a DIAN
-        public DateTime? DianApprovedDate { get; set; }     // Fecha de aprobación por DIAN
-        public string? DianResponseMessage { get; set; }    // Mensaje de error si es rechazado
+        public string? ConsecutiveNumber { get; set; }
+        public string? CUFE { get; set; }
+        public string? DianStatus { get; set; }
+        public DateTime? DianSentDate { get; set; }
+        public DateTime? DianApprovedDate { get; set; }
+        public string? DianResponseMessage { get; set; }
 
         // Datos de pago y comerciales
-        public string? PaymentMethod { get; set; }          // Contado, Crédito, Tarjeta, etc.
-        public DateTime? DueDate { get; set; }              // Fecha de vencimiento (si es crédito)
-        public string? PurchaseOrderNumber { get; set; }    // Orden de compra del cliente
+        public string? PaymentMethod { get; set; }
+        public DateTime? DueDate { get; set; }
+        public string? PurchaseOrderNumber { get; set; }
 
         // Archivos generados
-        public string? XmlContent { get; set; }             // XML enviado a la DIAN
-        public string? PdfUrl { get; set; }                 // URL del PDF generado
+        public string? XmlContent { get; set; }
+        public string? PdfUrl { get; set; }
 
-        // Relación con detalles
+        // Relaciones
         public virtual ICollection<SaleDetailEntity> Details { get; set; } = new List<SaleDetailEntity>();
+        public virtual ICollection<PaymentEntity> Payments { get; set; } = new List<PaymentEntity>();
     }
 }

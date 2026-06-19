@@ -105,18 +105,26 @@ namespace InventoryHub.Services
             // Verificar si el producto ya existe en el carrito
             var existingDetail = cart.Details.FirstOrDefault(d => d.ProductId == request.ProductId);
 
+            // Validar stock disponible
+            var product = await _saleRepository.GetProductByIdAsync(request.ProductId);
+            if (product == null) return null;
+
+            var currentQtyInCart = existingDetail?.Quantity ?? 0;
+            var totalRequested = currentQtyInCart + request.Quantity;
+            if (totalRequested > product.Stock)
+                throw new InvalidOperationException(
+                    $"Stock insuficiente para \"{product.Name}\". Disponible: {product.Stock}, solicitado: {totalRequested}.");
+
             if (existingDetail != null)
             {
-                // Actualizar cantidad
-                existingDetail.Quantity += request.Quantity;
+                existingDetail.Quantity = totalRequested;
+                existingDetail.SubTotal = existingDetail.UnitPrice * existingDetail.Quantity;
+                existingDetail.TaxAmount = existingDetail.SubTotal * existingDetail.TaxRate;
+                existingDetail.Total = existingDetail.SubTotal - existingDetail.Discount + existingDetail.TaxAmount;
                 await _saleRepository.UpdateDetailAsync(existingDetail);
             }
             else
             {
-                // Obtener el producto para sus datos
-                var product = await _saleRepository.GetProductByIdAsync(request.ProductId);
-                if (product == null) return null;
-
                 var taxRate = product.TaxRate ?? 0m;
 
                 var subtotal = product.Price * request.Quantity;
@@ -131,7 +139,11 @@ namespace InventoryHub.Services
                     TaxRate = taxRate,
                     SubTotal = subtotal,
                     TaxAmount = taxAmount,
-                    Total = subtotal - 0 + taxAmount
+                    Total = subtotal - 0 + taxAmount,
+                    WarrantyDays = product.DefaultWarrantyDays,
+                    WarrantyEndDate = product.DefaultWarrantyDays.HasValue
+                        ? DateTime.UtcNow.AddDays(product.DefaultWarrantyDays.Value)
+                        : null
                 };
 
                 await _saleRepository.AddDetailAsync(newDetail);
@@ -151,6 +163,13 @@ namespace InventoryHub.Services
 
             var sale = await _saleRepository.GetByIdAsync(detail.SaleId);
             if (sale == null || sale.Status != SaleStatus.Draft) return null;
+
+            // Validar stock disponible
+            var product = await _saleRepository.GetProductByIdAsync(detail.ProductId);
+            if (product == null) return null;
+            if (request.Quantity > product.Stock)
+                throw new InvalidOperationException(
+                    $"Stock insuficiente para \"{product.Name}\". Disponible: {product.Stock}, solicitado: {request.Quantity}.");
 
             // Actualizar cantidad
             detail.Quantity = request.Quantity;
@@ -212,13 +231,55 @@ namespace InventoryHub.Services
             sale.DocumentType = request.DocumentType;
             sale.PaymentMethod = request.PaymentMethod;
 
+            if (request.DueDate.HasValue)
+                sale.DueDate = request.DueDate;
+
             if (request.DocumentType == SaleDocumentType.Electronic)
             {
-                sale.DueDate = request.DueDate;
                 sale.DianStatus = "Pendiente";
             }
 
+            // Determinar estado de pago según método
+            var isCashPayment = string.IsNullOrEmpty(request.PaymentMethod)
+                || request.PaymentMethod.Equals("Contado", StringComparison.OrdinalIgnoreCase)
+                || request.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase)
+                || request.PaymentMethod.Equals("Tarjeta", StringComparison.OrdinalIgnoreCase)
+                || request.PaymentMethod.Equals("Transferencia", StringComparison.OrdinalIgnoreCase);
+
+            if (isCashPayment)
+            {
+                sale.PaymentStatus = Enums.PaymentStatus.Paid;
+            }
+            else
+            {
+                sale.PaymentStatus = Enums.PaymentStatus.Pending;
+            }
+
+            // Validar stock disponible antes de finalizar
+            foreach (var detail in sale.Details)
+            {
+                var prod = await _saleRepository.GetProductByIdAsync(detail.ProductId);
+                if (prod == null)
+                    throw new InvalidOperationException($"Producto con ID {detail.ProductId} no encontrado.");
+                if (prod.Stock < detail.Quantity)
+                    throw new InvalidOperationException(
+                        $"Stock insuficiente para \"{prod.Name}\". Disponible: {prod.Stock}, requerido: {detail.Quantity}.");
+            }
+
             await _saleRepository.UpdateAsync(sale);
+
+            // Auto-crear pago si es de contado
+            if (isCashPayment)
+            {
+                var payment = new PaymentEntity
+                {
+                    SaleId = sale.Id,
+                    Amount = sale.Total,
+                    PaymentMethod = request.PaymentMethod ?? "Efectivo",
+                    PaymentDate = DateTime.UtcNow
+                };
+                await _saleRepository.AddPaymentAsync(payment);
+            }
 
             // Descontar inventario
             foreach (var detail in sale.Details)
@@ -242,6 +303,27 @@ namespace InventoryHub.Services
         {
             var details = await _saleRepository.GetDetailsBySaleIdAsync(saleId);
             return _mapper.Map<List<SaleDetailResponseDTO>>(details);
+        }
+
+        // ==================== WARRANTY CLAIM ====================
+
+        public async Task<SaleDetailResponseDTO?> ClaimWarranty(int detailId, WarrantyClaimRequestDTO request)
+        {
+            var detail = await _saleRepository.GetDetailByIdAsync(detailId);
+            if (detail == null) return null;
+            if (detail.WarrantyEndDate == null) return null;
+            if (detail.WarrantyEndDate < DateTime.UtcNow) return null;
+            if (detail.WarrantyClaimed) return null;
+
+            detail.WarrantyClaimed = true;
+            detail.WarrantyClaimDate = DateTime.UtcNow;
+            detail.WarrantyResolution = request.Resolution;
+            detail.WarrantyNotes = request.Notes;
+            detail.WarrantyReplacementCode = request.ReplacementCode;
+
+            await _saleRepository.UpdateDetailAsync(detail);
+
+            return _mapper.Map<SaleDetailResponseDTO>(detail);
         }
 
         // ==================== ELECTRONIC INVOICE ====================
@@ -273,6 +355,7 @@ namespace InventoryHub.Services
 
             sale.SubTotal = details.Sum(d => d.SubTotal);
             sale.Tax = details.Sum(d => d.TaxAmount);
+            sale.Discount = details.Sum(d => d.Discount);
             sale.Total = details.Sum(d => d.Total);
 
             await _saleRepository.UpdateAsync(sale);

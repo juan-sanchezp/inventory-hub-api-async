@@ -35,6 +35,10 @@ namespace InventoryHub.DTOs.Customer
 
         [StringLength(500)]
         public string? Notes { get; set; }
+
+        public decimal? CreditLimit { get; set; }
+        public decimal CurrentBalance { get; set; }
+        public bool IsCreditEnabled { get; set; }
     }
 }
 

@@ -19,6 +19,7 @@ namespace InventoryHub.Data
         public DbSet<CustomerEntity> Customers { get; set; }
         public DbSet<SaleEntity> Sales { get; set; }
         public DbSet<SaleDetailEntity> SaleDetails { get; set; }
+        public DbSet<PaymentEntity> Payments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

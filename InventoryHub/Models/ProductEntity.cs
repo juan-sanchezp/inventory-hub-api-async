@@ -47,6 +47,9 @@ namespace InventoryHub.Models
         public int CategoryId { get; set; }
         public CategoryEntity Category { get; set; } = null!;
 
+        // 🔹 Garantía por defecto (en días, null = sin garantía)
+        public int? DefaultWarrantyDays { get; set; }
+
         // 🔹 Detalles opcionales de tiras LED
         public LedStripDetailsEntity? LedDetails { get; set; }
     }

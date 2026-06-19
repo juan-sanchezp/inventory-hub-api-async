@@ -26,5 +26,10 @@ namespace InventoryHub.Repositories
         // Product helpers
         Task<ProductEntity?> GetProductByIdAsync(int productId);
         Task<bool> UpdateProductStock(int productId, int quantityToSubtract);
+
+        // Payment balance helpers
+        Task<List<SaleEntity>> GetByCustomerIdAsync(int customerId);
+        Task UpdateCustomerBalance(int customerId, decimal balance);
+        Task<PaymentEntity> AddPaymentAsync(PaymentEntity payment);
     }
 }

@@ -184,6 +184,23 @@ namespace InventoryHub.Controllers
             return Ok(ResponseFactory.Success(detail, "Sale detail retrieved successfully"));
         }
 
+        // ==================== WARRANTY ====================
+
+        [HttpPost("details/{detailId}/warranty-claim")]
+        public async Task<IActionResult> ClaimWarranty(int detailId, [FromBody] WarrantyClaimRequestDTO request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ResponseFactory.Fail<object>("Invalid data"));
+
+            var detail = await _saleService.ClaimWarranty(detailId, request);
+
+            if (detail == null)
+                return BadRequest(ResponseFactory.Fail<object>(
+                    "Could not claim warranty. The item may not exist, not be in warranty, or already claimed."));
+
+            return Ok(ResponseFactory.Success(detail, "Warranty claim registered successfully"));
+        }
+
         // ==================== DIAN ====================
 
         [HttpPost("{saleId}/send-to-dian")]

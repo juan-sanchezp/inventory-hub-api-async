@@ -22,5 +22,16 @@
         public decimal SubTotal { get; set; }       // Quantity * UnitPrice
         public decimal TaxAmount { get; set; }      // SubTotal * TaxRate
         public decimal Total { get; set; }          // SubTotal - Discount + TaxAmount
+
+        // Garantía (copiada del producto al momento de la venta)
+        public int? WarrantyDays { get; set; }
+        public DateTime? WarrantyEndDate { get; set; }
+
+        // Reclamo de garantía
+        public bool WarrantyClaimed { get; set; }
+        public DateTime? WarrantyClaimDate { get; set; }
+        public string? WarrantyResolution { get; set; }  // Cambio mismo, Cambio otro, Reparado, Reembolsado
+        public string? WarrantyNotes { get; set; }
+        public string? WarrantyReplacementCode { get; set; }  // Código del producto entregado como reemplazo
     }
 }

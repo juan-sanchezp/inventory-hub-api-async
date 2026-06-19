@@ -15,7 +15,9 @@ namespace InventoryHub.Mapping
                 .ForMember(dest => dest.CustomerName,
                     opt => opt.MapFrom(src => src.Customer != null ? src.Customer.Name : null))
                 .ForMember(dest => dest.Details,
-                    opt => opt.MapFrom(src => src.Details));
+                    opt => opt.MapFrom(src => src.Details))
+                .ForMember(dest => dest.PaymentStatus,
+                    opt => opt.MapFrom(src => src.PaymentStatus));
 
             // Create Request -> Entity
             CreateMap<CreateSaleRequestDTO, SaleEntity>()

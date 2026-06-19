@@ -24,6 +24,8 @@
 
         public bool IsActive { get; set; }
 
+        public int? DefaultWarrantyDays { get; set; }
+
         public LedDetailsUpdateDTO LedDetails { get; set; }
     }
 

@@ -135,6 +135,34 @@ namespace InventoryHub.Repositories
             return result > 0;
         }
 
+        // ==================== PAYMENT BALANCE HELPERS ====================
+
+        public async Task<List<SaleEntity>> GetByCustomerIdAsync(int customerId)
+        {
+            return await _context.Sales
+                .Where(s => s.CustomerId == customerId)
+                .ToListAsync();
+        }
+
+        public async Task UpdateCustomerBalance(int customerId, decimal balance)
+        {
+            var customer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.Id == customerId);
+            if (customer != null)
+            {
+                customer.CurrentBalance = balance;
+                _context.Customers.Update(customer);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<PaymentEntity> AddPaymentAsync(PaymentEntity payment)
+        {
+            await _context.Payments.AddAsync(payment);
+            await _context.SaveChangesAsync();
+            return payment;
+        }
+
         // ==================== PRODUCT HELPERS ====================
 
         public async Task<ProductEntity?> GetProductByIdAsync(int productId)

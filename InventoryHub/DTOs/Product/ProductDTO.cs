@@ -48,6 +48,9 @@ namespace InventoryHub.DTOs.Product
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
+        // Garantía por defecto en días
+        public int? DefaultWarrantyDays { get; set; }
+
         // Detalles opcionales de LED
         public LedStripDetailsDTO? LedDetails { get; set; }
     }

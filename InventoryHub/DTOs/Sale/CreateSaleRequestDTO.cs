@@ -68,6 +68,7 @@ namespace InventoryHub.DTOs.Sale
         public DateTime SaleDate { get; set; }
         public SaleDocumentType DocumentType { get; set; }
         public SaleStatus Status { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
         public decimal SubTotal { get; set; }
         public decimal Tax { get; set; }
         public decimal Discount { get; set; }
@@ -97,5 +98,22 @@ namespace InventoryHub.DTOs.Sale
         public decimal SubTotal { get; set; }
         public decimal TaxAmount { get; set; }
         public decimal Total { get; set; }
+        public int? WarrantyDays { get; set; }
+        public DateTime? WarrantyEndDate { get; set; }
+        public bool WarrantyClaimed { get; set; }
+        public DateTime? WarrantyClaimDate { get; set; }
+        public string? WarrantyResolution { get; set; }
+        public string? WarrantyNotes { get; set; }
+        public string? WarrantyReplacementCode { get; set; }
+    }
+}
+
+namespace InventoryHub.DTOs.Sale
+{
+    public class WarrantyClaimRequestDTO
+    {
+        public string Resolution { get; set; } = string.Empty;
+        public string? Notes { get; set; }
+        public string? ReplacementCode { get; set; }
     }
 }

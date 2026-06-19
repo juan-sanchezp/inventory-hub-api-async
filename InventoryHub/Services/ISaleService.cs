@@ -25,5 +25,8 @@ namespace InventoryHub.Services
 
         // Electronic invoice methods (para futuro)
         Task<SaleResponseDTO?> SendToDian(int saleId);
+
+        // Warranty claim
+        Task<SaleDetailResponseDTO?> ClaimWarranty(int detailId, WarrantyClaimRequestDTO request);
     }
 }
