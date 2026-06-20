@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
+using InventoryHub.Data;
 using InventoryHub.DTOs.Sale;
 using InventoryHub.Enums;
 using InventoryHub.Models;
 using InventoryHub.Repositories;
-
 
 namespace InventoryHub.Services
 {
@@ -11,13 +11,19 @@ namespace InventoryHub.Services
     {
         private readonly ISaleRepository _saleRepository;
         private readonly IMapper _mapper;
+        private readonly AppDbContext _context;
+        private readonly ILogger<SaleServiceImpl> _logger;
 
         public SaleServiceImpl(
             ISaleRepository saleRepository,
-            IMapper mapper)
+            IMapper mapper,
+            AppDbContext context,
+            ILogger<SaleServiceImpl> logger)
         {
             _saleRepository = saleRepository;
             _mapper = mapper;
+            _context = context;
+            _logger = logger;
         }
 
         // ==================== BASIC CRUD ====================
@@ -220,74 +226,94 @@ namespace InventoryHub.Services
 
         public async Task<SaleResponseDTO?> Checkout(int saleId, CheckoutRequestDTO request)
         {
-            var sale = await _saleRepository.GetByIdAsync(saleId);
-            if (sale == null) return null;
-            if (sale.Status != SaleStatus.Draft) return null;
-            if (sale.Details == null || !sale.Details.Any()) return null;
-
-            // Actualizar datos de la venta
-            sale.Status = SaleStatus.Completed;
-            sale.CustomerId = request.CustomerId;
-            sale.DocumentType = request.DocumentType;
-            sale.PaymentMethod = request.PaymentMethod;
-
-            if (request.DueDate.HasValue)
-                sale.DueDate = request.DueDate;
-
-            if (request.DocumentType == SaleDocumentType.Electronic)
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                sale.DianStatus = "Pendiente";
-            }
+                var sale = await _saleRepository.GetByIdAsync(saleId);
+                if (sale == null) return null;
+                if (sale.Status != SaleStatus.Draft) return null;
+                if (sale.Details == null || !sale.Details.Any()) return null;
+                if (!request.CustomerId.HasValue)
+                    throw new InvalidOperationException("Debe seleccionar un cliente para realizar la venta.");
 
-            // Determinar estado de pago según método
-            var isCashPayment = string.IsNullOrEmpty(request.PaymentMethod)
-                || request.PaymentMethod.Equals("Contado", StringComparison.OrdinalIgnoreCase)
-                || request.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase)
-                || request.PaymentMethod.Equals("Tarjeta", StringComparison.OrdinalIgnoreCase)
-                || request.PaymentMethod.Equals("Transferencia", StringComparison.OrdinalIgnoreCase);
+                // Actualizar datos de la venta
+                sale.Status = SaleStatus.Completed;
+                sale.CustomerId = request.CustomerId;
+                sale.DocumentType = request.DocumentType;
+                sale.PaymentMethod = request.PaymentMethod;
 
-            if (isCashPayment)
-            {
-                sale.PaymentStatus = Enums.PaymentStatus.Paid;
-            }
-            else
-            {
-                sale.PaymentStatus = Enums.PaymentStatus.Pending;
-            }
+                if (request.DueDate.HasValue)
+                    sale.DueDate = request.DueDate;
 
-            // Validar stock disponible antes de finalizar
-            foreach (var detail in sale.Details)
-            {
-                var prod = await _saleRepository.GetProductByIdAsync(detail.ProductId);
-                if (prod == null)
-                    throw new InvalidOperationException($"Producto con ID {detail.ProductId} no encontrado.");
-                if (prod.Stock < detail.Quantity)
-                    throw new InvalidOperationException(
-                        $"Stock insuficiente para \"{prod.Name}\". Disponible: {prod.Stock}, requerido: {detail.Quantity}.");
-            }
-
-            await _saleRepository.UpdateAsync(sale);
-
-            // Auto-crear pago si es de contado
-            if (isCashPayment)
-            {
-                var payment = new PaymentEntity
+                if (request.DocumentType == SaleDocumentType.Electronic)
                 {
-                    SaleId = sale.Id,
-                    Amount = sale.Total,
-                    PaymentMethod = request.PaymentMethod ?? "Efectivo",
-                    PaymentDate = DateTime.UtcNow
-                };
-                await _saleRepository.AddPaymentAsync(payment);
-            }
+                    sale.DianStatus = "Pendiente";
+                }
 
-            // Descontar inventario
-            foreach (var detail in sale.Details)
+                // Determinar estado de pago según método
+                var isCashPayment = string.IsNullOrEmpty(request.PaymentMethod)
+                    || request.PaymentMethod.Equals("Contado", StringComparison.OrdinalIgnoreCase)
+                    || request.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase)
+                    || request.PaymentMethod.Equals("Tarjeta", StringComparison.OrdinalIgnoreCase)
+                    || request.PaymentMethod.Equals("Transferencia", StringComparison.OrdinalIgnoreCase);
+
+                if (isCashPayment)
+                {
+                    sale.PaymentStatus = Enums.PaymentStatus.Paid;
+                }
+                else
+                {
+                    sale.PaymentStatus = Enums.PaymentStatus.Pending;
+                }
+
+                // Validar stock disponible antes de finalizar
+                foreach (var detail in sale.Details)
+                {
+                    var prod = await _saleRepository.GetProductByIdAsync(detail.ProductId);
+                    if (prod == null)
+                        throw new InvalidOperationException($"Producto con ID {detail.ProductId} no encontrado.");
+                    if (prod.Stock < detail.Quantity)
+                        throw new InvalidOperationException(
+                            $"Stock insuficiente para \"{prod.Name}\". Disponible: {prod.Stock}, requerido: {detail.Quantity}.");
+                }
+
+                await _saleRepository.UpdateAsync(sale);
+
+                // Auto-crear pago si es de contado
+                if (isCashPayment)
+                {
+                    var payment = new PaymentEntity
+                    {
+                        SaleId = sale.Id,
+                        Amount = sale.Total,
+                        PaymentMethod = request.PaymentMethod ?? "Efectivo",
+                        PaymentDate = DateTime.UtcNow
+                    };
+                    await _saleRepository.AddPaymentAsync(payment);
+                }
+
+                // Descontar inventario
+                foreach (var detail in sale.Details)
+                {
+                    await _saleRepository.UpdateProductStock(detail.ProductId, detail.Quantity);
+                }
+
+                await transaction.CommitAsync();
+
+                return _mapper.Map<SaleResponseDTO>(sale);
+            }
+            catch (InvalidOperationException)
             {
-                await _saleRepository.UpdateProductStock(detail.ProductId, detail.Quantity);
+                await transaction.RollbackAsync();
+                throw; // el ErrorController devuelve el mensaje amigable al frontend
             }
-
-            return _mapper.Map<SaleResponseDTO>(sale);
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error en checkout SaleId {SaleId}, CustomerId {CustomerId}",
+                    saleId, request.CustomerId);
+                return null;
+            }
         }
 
         // ==================== SALE DETAILS MANAGEMENT ====================
