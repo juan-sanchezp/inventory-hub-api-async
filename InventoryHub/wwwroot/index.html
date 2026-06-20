@@ -1,0 +1,770 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InventoryHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styleModal.css">
+    <link rel="stylesheet" href="stylesEdition.css">a
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-logo">⚡</div>
+        <a class="sidebar-icon active" data-section="products" onclick="showSection('products')">
+            <span class="si-icon">☰</span>
+            <span class="si-label">Productos</span>
+        </a>
+        <a class="sidebar-icon" data-section="customers" onclick="showSection('customers')">
+            <span class="si-icon">◻</span>
+            <span class="si-label">Clientes</span>
+        </a>
+        <a class="sidebar-icon" data-section="sales" onclick="showSection('sales')">
+            <span class="si-icon">◈</span>
+            <span class="si-label">Ventas</span>
+        </a>
+        <a class="sidebar-icon" data-section="orders" onclick="showSection('orders')">
+            <span class="si-icon">📋</span>
+            <span class="si-label">Pedidos</span>
+        </a>
+        <a class="sidebar-icon" title="Configuración" style="margin-top:auto">
+            <span class="si-icon">⚙</span>
+            <span class="si-label">Config</span>
+        </a>
+    </aside>
+
+    <div class="main">
+        <div class="topbar">
+            <div class="topbar-search">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
+                <input placeholder="Buscar…" id="topbar-search">
+            </div>
+            <div class="topbar-right">
+                <div class="topbar-icon">🔔</div>
+                <div class="topbar-avatar">U</div>
+            </div>
+        </div>
+
+        <!-- ==================== PRODUCTS SECTION ==================== -->
+        <div class="page page-section" id="section-products">
+            <div class="breadcrumb"><a href="#">🏠</a><span>/</span><span>Inventario</span></div>
+            <div class="page-title-row">
+                <div class="page-title">Inventario Tiras LED</div>
+                <div class="page-subtitle">Gestión y búsqueda de tiras LED para televisores</div>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-card"><div class="sc-lbl">Total productos</div><div class="sc-val blue" id="stat-total">—</div><div class="sc-bar"><div class="sc-bar-fill" id="bar-total" style="width:100%;background:var(--accent)"></div></div></div>
+                <div class="stat-card"><div class="sc-lbl">Con stock</div><div class="sc-val green" id="stat-stock">—</div><div class="sc-bar"><div class="sc-bar-fill" id="bar-stock" style="background:var(--green)"></div></div></div>
+                <div class="stat-card"><div class="sc-lbl">Stock bajo</div><div class="sc-val red" id="stat-low">—</div><div class="sc-bar"><div class="sc-bar-fill" id="bar-low" style="background:var(--red)"></div></div></div>
+                <div class="stat-card"><div class="sc-lbl">Sin stock</div><div class="sc-val orange" id="stat-zero">—</div><div class="sc-bar"><div class="sc-bar-fill" id="bar-zero" style="background:var(--orange)"></div></div></div>
+            </div>
+
+            <div class="filter-card">
+                <div class="filter-head">Filtros de búsqueda</div>
+                <div class="filters-row">
+                    <div class="f-group"><label class="f-label">Código</label><input id="search" class="f-input w-lg" placeholder="H32-4" oninput="filterProductsDebounced()"></div>
+                    <div class="f-group"><label class="f-label">Modelo TV</label><input id="tvModel" class="f-input w-md" placeholder="Ej: 65DM1200" oninput="filterProductsDebounced()"></div>
+                    <div class="f-group"><label class="f-label">Pulgadas</label><input id="inch" type="number" class="f-input w-xs" placeholder="Ej: 65" oninput="filterProductsDebounced()"></div>
+                    <div class="f-group"><label class="f-label">#Tiras</label><input id="stripCount" type="number" min="1" class="f-input w-xs" placeholder="Ej: 12" oninput="filterProductsDebounced()"></div>
+                    <div class="f-group"><label class="f-label">LEDs</label><input id="ledCount" type="number" min="1" class="f-input w-xs" placeholder="Ej: 8" oninput="filterProductsDebounced()"></div>
+                    <div class="f-group">
+                        <label class="f-label">Voltaje</label>
+                        <select id="volts" class="f-select w-xs" onchange="filterProductsDebounced()">
+                            <option value="">Todos</option>
+                            <option value="3">3V</option>
+                            <option value="6">6V</option>
+                        </select>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Tipo Led</label>
+                        <select id="LedType" class="f-select w-xs" onchange="filterProductsDebounced()">
+                            <option value="">Todos</option>
+                            <option value="0">Normal</option>
+                            <option value="1">Cuadrado</option>
+                            <option value="2">Grano de Arroz</option>
+                            <option value="3">Mediano</option>
+                            <option value="4">Ojo de vaca</option>
+                        </select>
+                    </div>
+                    <div class="f-group"><label class="f-label">Board Code</label><input id="boardCode" class="f-input w-md" placeholder="Ej: HY65-CB12" oninput="filterProductsDebounced()"></div>
+                    <button class="btn-clear" onclick="clearSearch()">✕ Limpiar</button>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-top">
+                    <div class="table-top-title">Resultados <span id="results-count">— productos</span></div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Img</th><th>Código</th><th>Producto</th><th>Marca / Modelo</th><th style="font-size:13px">LEDs/#Tiras</th><th>Voltaje</th><th>Pulgadas</th><th>Precio</th><th>Stock</th></tr></thead>
+                        <tbody id="product-table"></tbody>
+                    </table>
+                    <div id="empty-state" class="empty-state" style="display:none"><div class="es-icon">⊘</div><div>Sin resultados</div></div>
+                </div>
+            </div>
+            <button id="cart-fab" class="cart-fab" onclick="openCartDrawer()" title="Abrir carrito de ventas">
+                🛒
+                <span class="cart-fab-badge" id="cart-fab-badge">0</span>
+            </button>
+        </div>
+
+        <!-- ==================== CUSTOMERS SECTION ==================== -->
+        <div class="page page-section" id="section-customers" style="display:none">
+            <div class="breadcrumb"><a href="#">🏠</a><span>/</span><span>Clientes</span></div>
+            <div class="page-title-row">
+                <div class="page-title">Clientes</div>
+                <div class="page-subtitle">Gestión de clientes</div>
+            </div>
+
+            <div class="filter-card">
+                <div class="filter-head">🔍 Buscar cliente</div>
+                <div class="filters-row">
+                    <div class="f-group" style="flex:1">
+                        <label class="f-label">Nombre / Documento / Teléfono</label>
+                        <input id="customer-search" class="f-input" placeholder="Buscar cliente…" oninput="filterCustomersDebounced()">
+                    </div>
+                    <button class="btn-search" onclick="openCustomerModal()">➕ Nuevo cliente</button>
+                </div>
+            </div>
+
+            <div class="cust-stats">
+                <div class="cust-stat"><span class="cust-stat-num" id="customer-count">0</span><span class="cust-stat-label">Total clientes</span></div>
+                <div class="cust-stat"><span class="cust-stat-num" id="customer-active-count">0</span><span class="cust-stat-label">Activos</span></div>
+            </div>
+            <div class="table-card">
+                <div class="table-top">
+                    <div class="table-top-title">👥 Listado de clientes</div>
+                </div>
+                <div class="table-wrap">
+                    <table id="customer-table-main">
+                        <thead><tr><th>📄 Documento</th><th>👤 Nombre</th><th>📞 Teléfono</th><th>✉️ Email</th><th>📍 Ciudad</th><th>⚡</th></tr></thead>
+                        <tbody id="customer-table"></tbody>
+                    </table>
+                    <div id="customer-empty" class="empty-state" style="display:none"><div class="es-icon">⊘</div><div>Sin clientes</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== SALES SECTION ==================== -->
+        <div class="page page-section" id="section-sales" style="display:none">
+            <div class="breadcrumb"><a href="#">🏠</a><span>/</span><span>🧾 Ventas</span></div>
+            <div class="page-title-row">
+                <div class="page-title">🧾 Punto de venta</div>
+                <div class="page-subtitle">Crear y gestionar ventas</div>
+            </div>
+
+            <div class="sale-card">
+                <div class="sale-card-header">
+                    <div>
+                        <h3>📋 Historial de ventas</h3>
+                        <span class="sale-count" id="sale-history-count">— ventas</span>
+                    </div>
+                    <button class="btn-primary" onclick="openCartDrawer()" style="display:flex;align-items:center;gap:8px;padding:10px 20px">
+                        🛒 Carrito <span id="cart-drawer-badge" class="cart-drawer-badge" style="display:none">0</span>
+                    </button>
+                </div>
+                <div class="sale-filters">
+                    <div class="sf-group">
+                        <label class="sf-label">Código producto</label>
+                        <input type="text" id="filter-sale-product-code" placeholder="Ej: LED-001" class="sf-input">
+                    </div>
+                    <div class="sf-group">
+                        <label class="sf-label">Cliente</label>
+                        <input type="text" id="filter-sale-customer" placeholder="Nombre cliente..." class="sf-input" style="width:160px">
+                    </div>
+                    <div class="sf-group">
+                        <label class="sf-label">Fecha desde</label>
+                        <input type="date" id="filter-sale-date-from" class="sf-input sf-date">
+                    </div>
+                    <div class="sf-group">
+                        <label class="sf-label">Fecha hasta</label>
+                        <input type="date" id="filter-sale-date-to" class="sf-input sf-date">
+                    </div>
+                    <button class="btn-primary sf-btn" onclick="applySaleFilters()">Filtrar</button>
+                    <button class="btn-ver sf-btn" onclick="clearSaleFilters()">Limpiar</button>
+                </div>
+                <div class="table-wrap">
+                    <table id="sales-history-table">
+                        <thead><tr><th>🔢 Nº</th><th>👤 Cliente</th><th>📅 Fecha</th><th>💰 Total</th><th>🚦 Estado</th><th>💳 Pago</th><th>📋 Tipo</th><th></th></tr></thead>
+                        <tbody id="sale-history-table"></tbody>
+                    </table>
+                    <div id="sale-history-empty" class="empty-state" style="display:none"><div class="es-icon">⊘</div><div>Sin ventas</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page page-section" id="section-orders" style="display:none">
+        <div class="breadcrumb"><a href="#">🏠</a><span>/</span><span>Pedidos</span></div>
+        <div class="page-title-row">
+            <div class="page-title">Pedidos</div>
+            <div class="page-subtitle">Gestión de pedidos pendientes</div>
+        </div>
+        <div style="padding:40px 0;text-align:center;color:var(--muted);font-size:16px">
+            <div style="font-size:48px;margin-bottom:12px">📋</div>
+            <div>Sección de pedidos en desarrollo</div>
+        </div>
+    </div>
+
+    <!-- ==================== PRODUCT MODAL ==================== -->
+    <div id="modal" onclick="handleModalBg(event)">
+        <div class="modal-panel">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <div class="modal-eyebrow"><span class="dot-live"></span><span id="m-category">Tiras LED</span></div>
+                    <div class="modal-title" id="modal-title">— </div>
+                    <div class="modal-meta">
+                        <span class="modal-meta-item">COD: <span id="m-code" style="color:#ef4444;font-size:20px;font-weight:700;">—</span></span>
+                        <span class="modal-meta-item">MARCA: <span id="m-brand">—</span></span>
+                        <span class="modal-meta-item">MODELO: <span id="m-model">—</span></span>
+                        <button id="btn-open-register" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onclick="openRegisterModal()">➕ Registrar producto</button>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="gallery-col">
+                    <div class="main-img-wrap" onclick="openLightbox()">
+                        <img id="main-image" src="" alt="Producto" loading="lazy">
+                        <span class="img-counter" id="img-counter" style="display:none"></span>
+                        <span class="main-badge" id="main-badge" style="display:none">PRINCIPAL</span>
+                        <div class="zoom-hint">🔍 AMPLIAR</div>
+                    </div>
+                    <div class="thumbs-wrap" id="thumbnails"></div>
+                    <div class="upload-wrap">
+                        <input type="file" id="uploadImagesInput" multiple style="display:none">
+                        <button onclick="openImageEditMode()" class="btn-upload">📤 Administrar imágenes</button>
+                    </div>
+                    <div class="gallery-meta">
+                        <div class="gallery-meta-item">
+                            <span class="gallery-meta-icon">📦</span>
+                            <div><div class="gm-lbl">Referencia</div><div class="gm-val" id="s-board">—</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-col">
+                    <div>
+                        <div class="models-header">
+                            <span class="models-title">📺 MODELOS TV COMPATIBLES · <span id="m-model-count">0</span></span>
+                        </div>
+                        <div class="models-grid" id="model-list"></div>
+                    </div>
+
+                    <div>
+                        <div class="sec-label">Precio y disponibilidad</div>
+                        <div class="price-row">
+                            <div class="price-box"><div class="pb-lbl">Precio unitario</div><div class="pb-val" id="m-price">—</div></div>
+                            <div class="stock-box ok" id="m-stock-box"><div class="sb-lbl">Stock actual</div><div class="sb-val" id="m-stock">—</div><span class="sb-badge ok" id="m-stock-badge">—</span><div class="sb-order" id="m-order-stock" style="display:none;font-size:10px;color:#6b7280;margin-top:2px"></div></div>
+                            <div class="stock-action">
+                                <button class="btn-add-cart" onclick="openRemoveStock()">🛒 Agregar 1 unidad</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="sec-label">Especificaciones técnicas</div>
+                        <div class="specs-grid">
+                            <div class="spec-card hi"><div class="sc2-lbl">Pulgadas</div><div class="sc2-val" id="s-inch">—</div></div>
+                            <div class="spec-card hi"><div class="sc2-lbl">Voltaje</div><div class="sc2-val" id="s-volts">—</div></div>
+                            <div class="spec-card"><div class="sc2-lbl">N° Tiras</div><div class="sc2-val" id="s-strips">—</div></div>
+                            <div class="spec-card"><div class="sc2-lbl">LEDs / tira</div><div class="sc2-val" id="s-leds">—</div></div>
+                            <div class="spec-card"><div class="sc2-lbl">Longitud</div><div class="sc2-val" id="s-length">—</div></div>
+                        </div>
+                        <div class="dist-notes-row">
+                            <div class="spec-card dist-card"><div class="sc2-lbl">Distribución</div><div class="sc2-val" id="s-dist">—</div></div>
+                            <div class="notes-wrap" id="notes-wrap"><div class="sec-label">Notas técnicas</div><div class="notes-box" id="s-notes"></div></div>
+                        </div>
+                    </div>
+                    <div id="desc-sec" style="display:none"><div class="sec-label">Descripción</div><div style="font-size:14px;color:var(--text2);line-height:1.6" id="s-desc"></div></div>
+
+                    <div>
+                        <div class="sec-label">Código de barras</div>
+                        <div class="code-row">
+                            <div class="code-block barcode"><div class="cb-lbl">Código de barras</div><div class="cb-val" id="s-barcode">—</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="edit-col" id="edit-col" style="display:none;">
+                    <div class="edit-header">
+                        <span class="edit-title">✎ Editando producto</span>
+                        <span class="edit-subtitle" id="edit-code-ref">Código: <span id="edit-code-display">—</span></span>
+                    </div>
+                    <div class="edit-form">
+                        <div class="edit-section">
+                            <div class="edit-section-title">Información básica</div>
+                            <div class="edit-row">
+                                <div class="edit-field"><label class="edit-label">Nombre del producto *</label><input type="text" id="edit-name" class="edit-input"></div>
+                                <div class="edit-field"><label class="edit-label">Marca *</label><input type="text" id="edit-brand" class="edit-input"></div>
+                            </div>
+                            <div class="edit-row">
+                                <div class="edit-field"><label class="edit-label">Modelo *</label><input type="text" id="edit-model" class="edit-input"></div>
+                                <div class="edit-field"><label class="edit-label">Código de barras</label><input type="text" id="edit-barcode" class="edit-input"></div>
+                            </div>
+                            <div class="edit-row">
+                                <div class="edit-field"><label class="edit-label">Precio *</label><input type="number" id="edit-price" class="edit-input" step="0.01" min="0"></div>
+                                <div class="edit-field"><label class="edit-label">Stock actual *</label><input type="number" id="edit-stock" class="edit-input" min="0"></div>
+                                <div class="edit-field"><label class="edit-label">Stock mínimo *</label><input type="number" id="edit-minStock" class="edit-input" min="0"></div>
+                                <div class="edit-field"><label class="edit-label">Stock a Pedir</label><input type="number" id="edit-orderStock" class="edit-input" min="0"></div>
+                                <div class="edit-field"><label class="edit-label">Garantía (días)</label><input type="number" id="edit-warranty" class="edit-input" min="0" placeholder="0 = sin garantía"></div>
+                            </div>
+                        </div>
+                        <div class="edit-section">
+                            <div class="edit-section-title">Especificaciones técnicas</div>
+                            <div class="edit-row">
+                                <div class="edit-field"><label class="edit-label">Pulgadas</label><input type="number" id="edit-inch" class="edit-input"></div>
+                                <div class="edit-field"><label class="edit-label">Voltaje (V)</label><select id="edit-volts" class="edit-input"><option value="">—</option><option value="3">3V</option><option value="6">6V</option></select></div>
+                                <div class="edit-field"><label class="edit-label">N° de Tiras</label><input type="number" id="edit-stripCount" class="edit-input"></div>
+                            </div>
+                            <div class="edit-row">
+                                <div class="edit-field"><label class="edit-label">LEDs por tira</label><input type="number" id="edit-ledCount" class="edit-input"></div>
+                                <div class="edit-field"><label class="edit-label">Longitud (mm)</label><input type="number" id="edit-length" class="edit-input"></div>
+                                <div class="edit-field"><label class="edit-label">Distribución</label><input type="text" id="edit-distribution" class="edit-input"></div>
+                                <div class="edit-field">
+                                    <label class="edit-label">Tipo de LED</label>
+                                    <select id="edit-ledType" class="edit-input">
+                                        <option value="0">Normal</option>
+                                        <option value="1">Cuadrado</option>
+                                        <option value="2">Grano de Arroz</option>
+                                        <option value="3">Mediano</option>
+                                        <option value="4">Ojo de vaca</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="edit-row">
+                                <div class="edit-field full-width"><label class="edit-label">Ref. Tira</label><input type="text" id="edit-boardCode" class="edit-input"></div>
+                            </div>
+                        </div>
+                        <div class="edit-section">
+                            <div class="edit-section-title">Modelos de TV compatibles</div>
+                            <div class="edit-field full-width edit-models-field">
+                                <label class="edit-label">Modelos compatibles (separados por coma)</label>
+                                <input type="text" id="edit-models" class="edit-input" placeholder="Ej: 32LB580, 32LF585, 32LB550F">
+                                <small class="edit-hint">Ejemplo: 32LN5400, 32LM3400, 32LB580</small>
+                            </div>
+                        </div>
+                        <div class="edit-section">
+                            <div class="edit-section-title">Notas y descripción</div>
+                            <div class="edit-field full-width"><label class="edit-label">Notas técnicas</label><textarea id="edit-notes" class="edit-textarea" rows="2"></textarea></div>
+                            <div class="edit-field full-width"><label class="edit-label">Descripción del producto</label><textarea id="edit-description" class="edit-textarea" rows="3"></textarea></div>
+                        </div>
+                        <div class="edit-section">
+                            <div class="edit-field checkbox-field">
+                                <input type="checkbox" id="edit-isActive" checked>
+                                <label for="edit-isActive">Producto activo</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="edit-col" id="register-col" style="display:none;">
+                    <div class="edit-header">
+                        <span class="edit-title">➕ Registrar nuevo producto</span>
+                        <span class="edit-subtitle">Complete todos los campos requeridos (*)</span>
+                    </div>
+                    <div class="edit-form">
+                        <div class="edit-section">
+                            <div class="edit-section-title">Información básica</div>
+                            <div class="edit-row">
+                                <div class="edit-field">
+                                    <label class="edit-label">Código del producto *</label>
+                                    <input type="text" id="register-code" class="edit-input">
+                                    <small class="edit-hint">Código único del producto</small>
+                                </div>
+                                <div class="edit-field">
+                                    <label class="edit-label">Categoría ID *</label>
+                                    <input type="number" id="register-categoryId" class="edit-input" value="1" min="1">
+                                </div>
+                            </div>
+                            <div class="edit-row">
+                                <div class="edit-field">
+                                    <label class="edit-label">Categoría Nombre *</label>
+                                    <input type="text" id="register-categoryName" class="edit-input" value="Tiras LED">
+                                </div>
+                                <div class="edit-field">
+                                    <label class="edit-label">Nombre del producto *</label>
+                                    <input type="text" id="register-name" class="edit-input">
+                                </div>
+                            </div>
+                            <div class="edit-row">
+                                <div class="edit-field"><label class="edit-label">Marca *</label><input type="text" id="register-brand" class="edit-input"></div>
+                                <div class="edit-field"><label class="edit-label">Modelo</label><input type="text" id="register-model" class="edit-input"></div>
+                            </div>
+                            <div class="edit-row">
+                                <div class="edit-field"><label class="edit-label">Código de barras</label><input type="text" id="register-barcode" class="edit-input"></div>
+                                <div class="edit-field"><label class="edit-label">Precio *</label><input type="number" id="register-price" class="edit-input" step="0.01" min="0"></div>
+                            </div>
+                            <div class="edit-row">
+                                <div class="edit-field"><label class="edit-label">Stock actual</label><input type="number" id="register-stock" class="edit-input" min="0" value="0"></div>
+                                <div class="edit-field"><label class="edit-label">Stock mínimo</label><input type="number" id="register-minStock" class="edit-input" min="0" value="2"></div>
+                                <div class="edit-field"><label class="edit-label">Stock ordenado</label><input type="number" id="register-orderStock" class="edit-input" min="0" value="0"></div>
+                                <div class="edit-field"><label class="edit-label">Garantía (días)</label><input type="number" id="register-warranty" class="edit-input" min="0" value="0" placeholder="0 = sin garantía"></div>
+                                <div class="edit-field">
+                                    <label class="edit-label">Activo</label>
+                                    <select id="register-isActive" class="edit-input">
+                                        <option value="true">Sí</option>
+                                        <option value="false">No</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="edit-section">
+                            <div class="edit-section-title">Especificaciones técnicas LED</div>
+                            <div class="edit-row">
+                                <div class="edit-field"><label class="edit-label">Pulgadas</label><input type="number" id="register-inch" class="edit-input"></div>
+                                <div class="edit-field"><label class="edit-label">Voltaje (V)</label><select id="register-volts" class="edit-input"><option value="">—</option><option value="3">3V</option><option value="6" selected>6V</option></select></div>
+                                <div class="edit-field"><label class="edit-label">N° de T *</label><input type="number" id="register-stripCount" class="edit-input" min="1"></div>
+                            </div>
+                            <div class="edit-row">
+                                <div class="edit-field"><label class="edit-label">LEDs por tira</label><input type="number" id="register-ledCount" class="edit-input"></div>
+                                <div class="edit-field"><label class="edit-label">Longitud (mm)</label><input type="number" id="register-length" class="edit-input"></div>
+                                <div class="edit-field">
+                                    <label class="edit-label">Tipo de LED</label>
+                                    <select id="register-ledType" class="edit-input">
+                                        <option value="0">Normal</option>
+                                        <option value="1">Cuadrado</option>
+                                        <option value="2">Grano de arroz</option>
+                                        <option value="3">Mediano</option>
+                                        <option value="4">Ojo de vaca</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="edit-row">
+                                <div class="edit-field"><label class="edit-label">Distribución</label><input type="text" id="register-distribution" class="edit-input"></div>
+                                <div class="edit-field"><label class="edit-label">Board Code</label><input type="text" id="register-boardCode" class="edit-input"></div>
+                            </div>
+                        </div>
+
+                        <div class="edit-section">
+                            <div class="edit-section-title">Modelos de TV compatibles</div>
+                            <div class="edit-field full-width edit-models-field">
+                                <label class="edit-label">Modelos compatibles (separados por coma)</label>
+                                <input type="text" id="register-models" class="edit-input" placeholder="Ej: HYLED6519INTM, 65XLEDPRO2, 65DM1300">
+                                <small class="edit-hint">Ejemplo: HYLED6519INTM, 65XLEDPRO2, 65DM1300</small>
+                            </div>
+                        </div>
+
+                        <div class="edit-section">
+                            <div class="edit-section-title">Notas y descripción</div>
+                            <div class="edit-field full-width"><label class="edit-label">Notas técnicas</label><textarea id="register-notes" class="edit-textarea" rows="2"></textarea></div>
+                            <div class="edit-field full-width"><label class="edit-label">Descripción del producto</label><textarea id="register-description" class="edit-textarea" rows="3"></textarea></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer" id="modal-footer">
+                <button class="btn-modal-close" onclick="closeModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== CUSTOMER MODAL ==================== -->
+    <div id="customer-modal" style="display:none" onclick="handleCustomerModalBg(event)">
+        <div class="modal-panel" style="max-width:560px">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <div class="modal-eyebrow"><span class="dot-live"></span><span>Clientes</span></div>
+                    <div class="modal-title">👤 <span id="customer-modal-title">Nuevo cliente</span></div>
+                </div>
+                <button class="modal-close" onclick="closeCustomerModal()">✕</button>
+            </div>
+            <div class="modal-body" style="padding:20px 24px;overflow-y:auto">
+                <div class="customer-form">
+                    <div class="cf-row">
+                        <div class="cf-group">
+                            <label class="cf-label">📄 Tipo</label>
+                            <select id="cf-documentType" class="cf-input">
+                                <option value="CC">CC</option>
+                                <option value="NIT">NIT</option>
+                                <option value="CE">CE</option>
+                                <option value="Pasaporte">Pasaporte</option>
+                            </select>
+                        </div>
+                        <div class="cf-group">
+                            <label class="cf-label">🔑 N° documento *</label>
+                            <input id="cf-documentNumber" class="cf-input" placeholder="123456789">
+                        </div>
+                    </div>
+                    <div class="cf-row">
+                        <div class="cf-group">
+                            <label class="cf-label">👤 Nombre *</label>
+                            <input id="cf-name" class="cf-input" placeholder="Nombre del cliente">
+                        </div>
+                        <div class="cf-group">
+                            <label class="cf-label">📞 Teléfono</label>
+                            <input id="cf-phone" class="cf-input" placeholder="3001234567">
+                        </div>
+                    </div>
+                    <div class="cf-row">
+                        <div class="cf-group">
+                            <label class="cf-label">✉️ Email</label>
+                            <input id="cf-email" type="email" class="cf-input" placeholder="cliente@email.com">
+                        </div>
+                        <div class="cf-group">
+                            <label class="cf-label">📍 Ciudad</label>
+                            <input id="cf-city" class="cf-input" placeholder="Bogotá">
+                        </div>
+                    </div>
+                    <div class="cf-row">
+                        <div class="cf-group">
+                            <label class="cf-label">🏠 Dirección</label>
+                            <input id="cf-address" class="cf-input" placeholder="Calle 123 #45-67">
+                        </div>
+                    </div>
+                    <div class="cf-row">
+                        <div class="cf-group">
+                            <label class="cf-label">📝 Notas</label>
+                            <textarea id="cf-notes" class="cf-input cf-textarea" rows="2" placeholder="Notas opcionales..."></textarea>
+                        </div>
+                    </div>
+                    <div class="cf-row">
+                        <label class="cf-toggle">
+                            <input type="checkbox" id="cf-isActive" checked>
+                            <span class="cf-toggle-slider"></span>
+                            Cliente activo
+                        </label>
+                    </div>
+                    <div class="cf-actions">
+                        <button class="cf-btn cf-btn-cancel" onclick="closeCustomerModal()">Cancelar</button>
+                        <button class="cf-btn cf-btn-save" onclick="saveCustomer()">💾 Guardar cliente</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SALE DETAIL MODAL ==================== -->
+    <div id="sale-detail-modal" style="display:none" onclick="handleSaleDetailBg(event)">
+        <div class="modal-panel" style="max-width:800px">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <div class="modal-eyebrow"><span class="dot-live"></span><span>Detalle de venta</span></div>
+                    <div class="modal-title">Venta <span id="sd-doc-type-badge" style="color:var(--accent)">POS</span> <span id="sd-id" style="color:var(--muted);font-size:15px">#—</span></div>
+                </div>
+                <button class="modal-close" onclick="closeSaleDetailModal()">✕</button>
+            </div>
+            <div class="modal-body" style="padding:12px 20px;overflow-y:auto;flex-direction:column">
+                <div class="sd-bar">
+                    <span class="sd-bar-item"><span class="sd-bar-label">👤</span><span id="sd-customer">—</span></span>
+                    <span class="sd-bar-item"><span class="sd-bar-label">📅</span><span id="sd-date">—</span></span>
+
+                    <span class="sd-bar-item sd-pill" id="sd-status">—</span>
+                    <span class="sd-bar-item sd-pill" id="sd-payment-status">—</span>
+                </div>
+
+                <div class="sd-table-wrap">
+                    <table id="sd-details-table">
+                        <thead><tr><th></th><th>Producto</th><th class="th-qty">Cant</th><th class="th-price">Total</th><th class="th-warranty">Garantía</th></tr></thead>
+                        <tbody id="sd-details-tbody"></tbody>
+                    </table>
+                </div>
+
+                <div class="sd-totals">
+                    <div class="sd-total-item"><span class="sd-total-label">Subtotal</span><span class="sd-total-value" id="sd-subtotal">$0</span></div>
+                    <div class="sd-total-item"><span class="sd-total-label">Impuestos</span><span class="sd-total-value" id="sd-tax">$0</span></div>
+                    <div class="sd-total-item"><span class="sd-total-label">Total</span><span class="sd-total-value sd-total-final" id="sd-total">$0</span></div>
+                </div>
+
+                <div style="margin-top:8px" id="sd-payment-summary"></div>
+
+                <div style="margin-top:10px;display:flex;justify-content:flex-end;gap:6px">
+                    <button class="btn-primary" id="sd-pay-btn" onclick="openPaymentModal()" style="display:none;padding:7px 14px;font-size:12px">💰 Registrar abono</button>
+                    <button class="btn-modal-close" onclick="closeSaleDetailModal()" style="padding:7px 14px;font-size:12px">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== CART DRAWER ==================== -->
+    <div id="cart-drawer-overlay" class="drawer-overlay" onclick="closeCartDrawer()"></div>
+    <div id="cart-drawer" class="cart-drawer">
+        <div class="drawer-header">
+            <div>
+                <div class="drawer-eyebrow"><span class="dot-live"></span><span>Punto de venta</span></div>
+                <div class="drawer-title">🛒 Carrito <span id="sale-cart-id" style="font-family:'Space Mono',monospace;color:var(--accent);font-size:14px">—</span></div>
+            </div>
+            <div style="display:flex;gap:8px">
+                <button class="btn-clear" onclick="clearCart()" style="padding:6px 12px;font-size:10px">Vaciar</button>
+                <button class="modal-close" onclick="closeCartDrawer()">✕</button>
+            </div>
+        </div>
+        <div class="drawer-body">
+            <div class="drawer-section" style="position:relative">
+                <label class="drawer-label">Cliente</label>
+                <input type="text" id="sale-customer-input" class="drawer-select" placeholder="Buscar cliente..." oninput="filterCustomerDropdown()" autocomplete="off">
+                <input type="hidden" id="sale-customer-id" value="">
+                <div id="sale-customer-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:var(--surface);border:1px solid var(--border);border-radius:8px;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.12)"></div>
+            </div>
+            <div class="drawer-section">
+                <label class="drawer-label">Tipo documento</label>
+                <select id="sale-document-type" class="drawer-select">
+                    <option value="1">POS</option>
+                    <option value="2">Electrónica</option>
+                </select>
+            </div>
+            <div class="drawer-section">
+                <label class="drawer-label">Método de pago</label>
+                <div class="drawer-radio-group">
+                    <label class="drawer-radio">
+                        <input type="radio" name="payment-method" value="Efectivo" checked> Efectivo
+                    </label>
+                    <label class="drawer-radio">
+                        <input type="radio" name="payment-method" value="Transferencia"> Transferencia
+                    </label>
+                    <label class="drawer-radio">
+                        <input type="radio" name="payment-method" value="Crédito"> Crédito
+                    </label>
+                </div>
+            </div>
+            <div class="drawer-table-wrap">
+                <table class="drawer-table">
+                    <thead><tr><th>Código</th><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead>
+                    <tbody id="sale-cart-table"></tbody>
+                </table>
+                <div id="sale-cart-empty" class="empty-state" style="display:none"><div class="es-icon">⊘</div><div>Carrito vacío</div></div>
+            </div>
+            <div class="drawer-totals">
+                <div class="drawer-total-row"><span>Subtotal</span><span id="sale-subtotal">$0</span></div>
+                <div class="drawer-total-row"><span>Impuestos</span><span id="sale-tax">$0</span></div>
+                <div class="drawer-total-row drawer-total-final"><span>Total</span><span id="sale-total">$0</span></div>
+            </div>
+            <div class="drawer-actions">
+                <button class="btn-cancel" onclick="closeCartDrawer()" style="padding:9px 20px;border:1px solid var(--border);background:var(--surface2);border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text2)">Cerrar</button>
+                <button id="sale-checkout-btn" class="btn-primary" onclick="checkoutSale()" disabled>💰 Finalizar venta</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== PAYMENT MODAL ==================== -->
+    <div id="payment-modal" style="display:none" onclick="if(event.target===this)closePaymentModal()">
+        <div class="modal-panel" style="max-width:420px">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <div class="modal-eyebrow"><span class="dot-live"></span><span>Pagos</span></div>
+                    <div class="modal-title">Registrar abono</div>
+                </div>
+                <button class="modal-close" onclick="closePaymentModal()">✕</button>
+            </div>
+            <div class="modal-body" style="padding:20px 24px;flex-direction:column;gap:16px">
+                <div style="font-size:13px;color:var(--text2)">Venta <strong id="pm-sale-id">#—</strong> — Total: <strong id="pm-total">$0</strong></div>
+                <div class="f-group">
+                    <label class="f-label">Monto del abono</label>
+                    <input type="number" id="pm-amount" class="f-input" placeholder="0" step="0.01" min="0">
+                </div>
+                <div class="f-group">
+                    <label class="f-label">Método de pago</label>
+                    <select id="pm-method" class="f-input">
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Transferencia">Transferencia</option>
+                        <option value="Tarjeta">Tarjeta</option>
+                        <option value="Crédito">Crédito</option>
+                    </select>
+                </div>
+                <div class="f-group">
+                    <label class="f-label">Referencia (opcional)</label>
+                    <input type="text" id="pm-reference" class="f-input" placeholder="Nro. transacción">
+                </div>
+                <div class="f-group">
+                    <label class="f-label">Notas (opcional)</label>
+                    <input type="text" id="pm-notes" class="f-input" placeholder="Notas…">
+                </div>
+                <div class="customer-form-actions">
+                    <button class="btn-cancel" onclick="closePaymentModal()" style="padding:9px 20px;border:1px solid var(--border);background:var(--surface2);border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text2)">Cancelar</button>
+                    <button class="btn-primary" onclick="recordPayment()">💾 Registrar abono</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== WARRANTY CLAIM MODAL ==================== -->
+    <div id="warranty-modal" style="display:none" onclick="if(event.target===this)closeWarrantyModal()">
+        <div class="modal-panel" style="max-width:420px">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <div class="modal-eyebrow"><span class="dot-live"></span><span>Garantía</span></div>
+                    <div class="modal-title">Reclamar garantía</div>
+                </div>
+                <button class="modal-close" onclick="closeWarrantyModal()">✕</button>
+            </div>
+            <div class="modal-body" style="padding:20px 24px;flex-direction:column;gap:16px">
+                <div class="f-group">
+                    <label class="f-label">Resolución</label>
+                    <select id="wm-resolution" class="f-input" onchange="toggleReplacementField()">
+                        <option value="Cambio mismo">Cambio mismo producto (defectuoso/dañado)</option>
+                        <option value="Cambio otro">Cambio por otro producto</option>
+                        <option value="Reparado">Reparado</option>
+                        <option value="Reembolsado">Reembolsado (devolución dinero)</option>
+                    </select>
+                </div>
+                <div class="f-group" id="wm-replacement-group" style="display:none">
+                    <label class="f-label">Código del producto de reemplazo</label>
+                    <input type="text" id="wm-replacement-code" class="f-input" placeholder="Ej: S55-4">
+                </div>
+                <div class="f-group">
+                    <label class="f-label">Notas (opcional)</label>
+                    <textarea id="wm-notes" class="f-input" rows="3" placeholder="Describe lo que pasó..."></textarea>
+                </div>
+                <div class="customer-form-actions">
+                    <button class="btn-cancel" onclick="closeWarrantyModal()" style="padding:9px 20px;border:1px solid var(--border);background:var(--surface2);border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text2)">Cancelar</button>
+                    <button class="btn-primary" onclick="confirmWarrantyClaim()">🔧 Confirmar reclamo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== LIGHTBOX ==================== -->
+    <div id="lightbox" onclick="handleLightboxBg(event)">
+        <button class="lb-btn lb-close" onclick="closeLightbox()">✕</button>
+        <button class="lb-btn lb-prev" id="lb-prev" onclick="lbNav(-1);event.stopPropagation()">‹</button>
+        <img id="lightbox-img" src="" alt="Ampliado">
+        <button class="lb-btn lb-next" id="lb-next" onclick="lbNav(1);event.stopPropagation()">›</button>
+        <div class="lb-counter" id="lb-counter"></div>
+        <div class="lb-caption" id="lb-caption"></div>
+    </div>
+
+    <!-- ==================== SCRIPTS ==================== -->
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/product.js"></script>
+    <script src="js/customer.js"></script>
+    <script src="js/sale.js"></script>
+    <script>
+        document.addEventListener("keydown", e => {
+            const lbOpen = document.getElementById("lightbox").classList.contains("open");
+            const drawerOpen = document.getElementById("cart-drawer").classList.contains("open");
+            if (e.key === "Escape") {
+                if (lbOpen) { closeLightbox(); }
+                else if (drawerOpen) { closeCartDrawer(); }
+                else { closeModal(); }
+                return;
+            }
+            if (lbOpen) {
+                if (e.key === "ArrowLeft") lbNav(-1);
+                if (e.key === "ArrowRight") lbNav(1);
+            }
+            if (e.key === "Enter"
+                && !document.getElementById("modal").classList.contains("open")
+                && !lbOpen
+                && document.activeElement !== document.getElementById("topbar-search")) {
+                doSearch();
+            }
+        });
+
+        document.getElementById("topbar-search").addEventListener("keydown", e => {
+            if (e.key === "Enter") {
+                document.getElementById("search").value = e.target.value;
+                doSearch();
+            }
+        });
+
+        loadAll();
+    </script>
+</body>
+</html>

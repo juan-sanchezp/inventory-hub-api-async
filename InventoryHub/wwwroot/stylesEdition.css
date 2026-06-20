@@ -1,0 +1,305 @@
+﻿.edit-col {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 0;
+    padding: 20px 24px 24px;
+    background: linear-gradient(160deg, #f0f4ff 0%, #f8fafc 100%);
+    border-left: 1px solid var(--border);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.edit-header {
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+    border-bottom: 1.5px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    position: relative;
+}
+
+    .edit-header::after {
+        content: '';
+        position: absolute;
+        bottom: -1.5px;
+        left: 0;
+        width: 50px;
+        height: 2.5px;
+        background: linear-gradient(90deg, #4f46e5, #818cf8);
+        border-radius: 2px;
+    }
+
+.edit-title {
+    font-size: 18px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.edit-subtitle {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+    .edit-subtitle span {
+        color: #4f46e5;
+        font-weight: 700;
+    }
+
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.edit-section {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 18px 18px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.edit-section-title {
+    font-weight: 700;
+    font-size: 12px;
+    color: #4338ca;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1.5px solid #e0e7ff;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+    .edit-section-title::before {
+        content: '';
+        width: 3px;
+        height: 14px;
+        background: linear-gradient(180deg, #4f46e5, #818cf8);
+        border-radius: 2px;
+        flex-shrink: 0;
+    }
+
+.edit-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+    .edit-row:last-child {
+        margin-bottom: 0;
+    }
+
+.edit-field {
+    flex: 1;
+    min-width: 130px;
+    display: flex;
+    flex-direction: column;
+}
+
+    .edit-field.full-width {
+        flex: 100%;
+    }
+
+.edit-label {
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #374151;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.edit-input,
+.edit-textarea {
+    padding: 9px 12px;
+    font-size: 14px;
+    font-family: 'Outfit', sans-serif;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    background: #f9fafb;
+    color: #111827;
+    transition: all 0.2s ease;
+}
+
+    .edit-input:hover,
+    .edit-textarea:hover {
+        background: #ffffff;
+        border-color: #a5b4fc;
+    }
+
+.edit-input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+    .edit-input[type="number"]::-webkit-inner-spin-button,
+    .edit-input[type="number"]::-webkit-outer-spin-button {
+        opacity: 0.3;
+    }
+
+select.edit-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 32px;
+    cursor: pointer;
+    background-color: #f9fafb;
+}
+
+.edit-textarea {
+    resize: vertical;
+    min-height: 60px;
+    line-height: 1.4;
+}
+
+    .edit-input::placeholder,
+    .edit-textarea::placeholder {
+        color: #9ca3af;
+        opacity: 0.5;
+    }
+
+    .edit-input:focus,
+    .edit-textarea:focus {
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+        outline: none;
+        background: #ffffff;
+    }
+
+.edit-models-field {
+    margin-top: 2px;
+}
+
+    .edit-models-field .edit-input {
+        font-size: 14px;
+        padding: 12px 14px;
+        border: 2px dashed #a5b4fc;
+        background: #f5f3ff;
+        border-radius: 10px;
+        letter-spacing: 0.01em;
+    }
+
+        .edit-models-field .edit-input:focus {
+            border-color: #4f46e5;
+            border-style: solid;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(79,70,229,0.12);
+        }
+
+        .edit-models-field .edit-input::placeholder {
+            color: #818cf8;
+            opacity: 0.5;
+        }
+
+    .edit-models-field .edit-label {
+        font-size: 12px;
+        color: #4f46e5;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+        .edit-models-field .edit-label::before {
+            content: '📺';
+            font-size: 13px;
+        }
+
+    .edit-models-field .edit-hint {
+        color: #6366f1;
+        opacity: 0.6;
+        font-weight: 500;
+    }
+
+.edit-col .btn-save,
+.edit-col .btn-cancel {
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.edit-col .btn-save {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(79,70,229,0.25);
+}
+
+    .edit-col .btn-save:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 16px rgba(79,70,229,0.35);
+    }
+
+.edit-col .btn-cancel {
+    background: #ffffff;
+    border: 1.5px solid #d1d5db;
+    color: #6b7280;
+}
+
+    .edit-col .btn-cancel:hover {
+        background: #fef2f2;
+        border-color: #fca5a5;
+        color: #dc2626;
+    }
+
+.checkbox-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 0;
+    padding: 12px 16px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+}
+
+    .checkbox-field input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: #4f46e5;
+        cursor: pointer;
+    }
+
+    .checkbox-field label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #166534;
+        cursor: pointer;
+    }
+
+.edit-hint {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 4px;
+    font-weight: 400;
+    line-height: 1.3;
+}
+
+.edit-col::-webkit-scrollbar {
+    width: 5px;
+}
+
+.edit-col::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 3px;
+}
+
+    .edit-col::-webkit-scrollbar-thumb:hover {
+        background-color: #94a3b8;
+    }
